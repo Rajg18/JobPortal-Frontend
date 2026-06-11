@@ -16,12 +16,12 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Immersive status bar — transparent with white icons.
+  // Light status bar — dark icons on white background.
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor:            Colors.transparent,
-    statusBarIconBrightness:   Brightness.light,
-    systemNavigationBarColor:  Color(0xFF0A1628),
-    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness:   Brightness.dark,
+    systemNavigationBarColor:  Color(0xFFFFFFFF),
+    systemNavigationBarIconBrightness: Brightness.dark,
   ));
 
   runApp(
@@ -40,7 +40,7 @@ class JobPortalApp extends StatelessWidget {
     return MaterialApp(
       title:          'JobPortal',
       debugShowCheckedModeBanner: false,
-      theme:          AppTheme.dark,
+      theme:          AppTheme.light,
       home:           const _AuthGate(),
     );
   }
@@ -129,17 +129,14 @@ class _AnimatedLogoState extends State<_AnimatedLogo>
       child: Container(
         width: 80, height: 80,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFF5A623), Color(0xFFFFC75F)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: const Color(0xFF0F172A),
           borderRadius: BorderRadius.circular(22),
         ),
-        child: const Icon(
-          Icons.work_outline_rounded,
-          color: Color(0xFF0A1628),
-          size: 38,
+        child: const Center(
+          child: Text('H',
+            style: TextStyle(
+              fontSize: 38, fontWeight: FontWeight.w800,
+              color: Colors.white)),
         ),
       ),
     );
