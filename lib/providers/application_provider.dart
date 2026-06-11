@@ -16,6 +16,19 @@ class ApplicationProvider extends ChangeNotifier {
   bool    get loading => _loading;
   String? get error   => _error;
 
+  /// Returns true if the user has already applied to [jobId].
+  /// Falls back to title+company match when jobId is absent in older responses.
+  bool hasAppliedToJob(int jobId, {String? title, String? company}) {
+    for (final a in _myApplications) {
+      if (a.jobId != null && a.jobId == jobId) return true;
+      if (a.jobId == null &&
+          title   != null && company != null &&
+          a.jobTitle.toLowerCase()    == title.toLowerCase() &&
+          a.companyName.toLowerCase() == company.toLowerCase()) return true;
+    }
+    return false;
+  }
+
   Future<void> loadMyApplications() async {
     _setLoading(true);
     try {

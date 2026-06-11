@@ -17,6 +17,18 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   bool _applying = false;
   bool _applied  = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Ensure applications are loaded so hasAppliedToJob() is accurate
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prov = context.read<ApplicationProvider>();
+      if (prov.myApplications.isEmpty && !prov.loading) {
+        prov.loadMyApplications();
+      }
+    });
+  }
+
   Future<void> _apply() async {
     if (_applying || _applied) return;
     setState(() => _applying = true);
@@ -211,13 +223,20 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       ),
 
       // ── Bottom apply bar ──────────────────────────────────────────────────
-      bottomNavigationBar: Container(
+      bottomNavigationBar: Builder(builder: (ctx) {
+        final alreadyApplied = _applied ||
+            context.watch<ApplicationProvider>().hasAppliedToJob(
+              widget.job.id,
+              title:   widget.job.title,
+              company: widget.job.companyName,
+            );
+        return Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
         decoration: const BoxDecoration(
           color: AppColors.background,
           border: Border(top: BorderSide(color: AppColors.divider)),
         ),
-        child: _applied
+        child: alreadyApplied
             ? Container(
                 height: 50,
                 decoration: BoxDecoration(
@@ -261,7 +280,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         ),
                 ),
               ),
-      ),
+        );
+      }),
     );
   }
 

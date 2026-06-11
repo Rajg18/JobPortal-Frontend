@@ -17,11 +17,7 @@ class UserShell extends StatefulWidget {
 class _UserShellState extends State<UserShell> {
   int _index = 0;
 
-  static const _screens = [
-    HomeScreen(),
-    MyApplicationsScreen(),
-    ProfileScreen(),
-  ];
+  void _goTo(int i) => setState(() => _index = i);
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +31,21 @@ class _UserShellState extends State<UserShell> {
       ],
       child: Builder(
         builder: (ctx) => Scaffold(
-          // Each screen handles its own Scaffold/AppBar — no outer shell chrome
-          body: IndexedStack(index: _index, children: _screens),
+          body: IndexedStack(
+            index: _index,
+            children: [
+              // Pass navigation callbacks so the home screen's navbar links work
+              HomeScreen(
+                onGoToApplications: () => _goTo(1),
+                onGoToProfile:      () => _goTo(2),
+              ),
+              const MyApplicationsScreen(),
+              const ProfileScreen(),
+            ],
+          ),
           bottomNavigationBar: _BottomNav(
             index: _index,
-            onTap: (i) => setState(() => _index = i),
+            onTap:  _goTo,
           ),
         ),
       ),
@@ -54,9 +60,8 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    // On wide screens, the nav is in each screen's AppBar; hide bottom nav
-    if (w > 900) return const SizedBox.shrink();
+    // Hide bottom nav on wide screens — top navbar handles navigation
+    if (MediaQuery.of(context).size.width > 900) return const SizedBox.shrink();
 
     return Container(
       decoration: const BoxDecoration(
@@ -68,11 +73,10 @@ class _BottomNav extends StatelessWidget {
         child: SizedBox(
           height: 60,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _item(0, Icons.work_outline_rounded,  Icons.work_rounded,          'Jobs'),
-              _item(1, Icons.inbox_outlined,         Icons.inbox_rounded,         'Applied'),
-              _item(2, Icons.person_outline_rounded, Icons.person_rounded,        'Profile'),
+              _item(context, 0, Icons.work_outline_rounded,   Icons.work_rounded,   'Jobs'),
+              _item(context, 1, Icons.inbox_outlined,          Icons.inbox_rounded,  'Applied'),
+              _item(context, 2, Icons.person_outline_rounded,  Icons.person_rounded, 'Profile'),
             ],
           ),
         ),
@@ -80,7 +84,7 @@ class _BottomNav extends StatelessWidget {
     );
   }
 
-  Widget _item(int i, IconData off, IconData on, String label) {
+  Widget _item(BuildContext ctx, int i, IconData off, IconData on, String label) {
     final sel = index == i;
     return Expanded(
       child: InkWell(
