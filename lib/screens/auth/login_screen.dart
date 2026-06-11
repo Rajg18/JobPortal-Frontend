@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -18,26 +19,44 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey   = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl  = TextEditingController();
-  bool  _obscure   = true;
+  bool  _obscure      = true;
+  bool  _showWarmup   = false; // shown after 8s of loading
+
+  Timer? _warmupTimer;
 
   @override
-  void dispose() { _emailCtrl.dispose(); _passCtrl.dispose(); super.dispose(); }
+  void dispose() {
+    _warmupTimer?.cancel();
+    _emailCtrl.dispose(); _passCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // After 8 seconds of waiting, hint that the server is warming up
+    _warmupTimer = Timer(const Duration(seconds: 8), () {
+      if (mounted) setState(() => _showWarmup = true);
+    });
+
     final auth = context.read<AuthProvider>();
     final ok   = await auth.login(
       email:    _emailCtrl.text.trim(),
       password: _passCtrl.text.trim(),
     );
+
+    _warmupTimer?.cancel();
     if (!mounted) return;
+    setState(() => _showWarmup = false);
+
     if (ok) {
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => auth.role == 'ADMIN' ? const AdminShell() : const UserShell()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(auth.error ?? 'Login failed'),
-        backgroundColor: AppColors.error));
+        backgroundColor: AppColors.error,
+        duration: const Duration(seconds: 6)));
     }
   }
 
@@ -191,6 +210,37 @@ class _LoginScreenState extends State<LoginScreen> {
                                   : const Text('Sign In'),
                             ),
                           ),
+                          if (_showWarmup) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: AppColors.warning.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: AppColors.warning.withValues(alpha: 0.3)),
+                              ),
+                              child: Row(children: [
+                                SizedBox(
+                                  width: 14, height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.warning),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Server is waking up on Render free tier — this can take up to 60s on the first request.',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: AppColors.warning,
+                                      height: 1.4),
+                                  ),
+                                ),
+                              ]),
+                            ),
+                          ],
                         ],
                       ),
                     ),

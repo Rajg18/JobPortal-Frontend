@@ -18,9 +18,9 @@ class AuthService {
         'password': password,
         'roles':    role,
       }),
-    ).timeout(const Duration(seconds: 60),
+    ).timeout(const Duration(seconds: 90),
         onTimeout: () => throw Exception(
-            'Request timed out. The server may be waking up — please try again.'));
+            'Server is still waking up (Render free tier takes ~60s on first request). Please wait a moment and try again.'));
 
     if (res.statusCode == 200 || res.statusCode == 201) return res.body;
     throw Exception(_extractError(res));
@@ -34,9 +34,9 @@ class AuthService {
       Uri.parse(ApiConstants.login),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': email, 'password': password}),
-    ).timeout(const Duration(seconds: 60),
+    ).timeout(const Duration(seconds: 90),
         onTimeout: () => throw Exception(
-            'Request timed out. The server may be waking up — please try again.'));
+            'Server is still waking up (Render free tier takes ~60s on first request). Please wait a moment and try again.'));
 
     if (res.statusCode == 200) {
       final data = jsonDecode(res.body) as Map<String, dynamic>;
