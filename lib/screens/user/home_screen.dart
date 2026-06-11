@@ -7,6 +7,7 @@ import '../../providers/job_provider.dart';
 import '../../providers/application_provider.dart';
 import '../../widgets/job_card.dart';
 import 'job_detail_screen.dart';
+import '../auth/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,91 +16,101 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _searchCtrl  = TextEditingController();
-  final _scrollCtrl  = ScrollController();
+  final _keywordCtrl  = TextEditingController();
   final _locationCtrl = TextEditingController();
+  final _scrollCtrl   = ScrollController();
   final _techCtrl     = TextEditingController();
   final _expCtrl      = TextEditingController();
-  int  _selectedTab  = 0;
-  bool _showFilters  = false;
+  int  _selectedTab   = 0;
+  bool _showFilters   = false;
 
-  static const _tabs = ['All', 'Remote', 'Full-time', 'Contract', 'Engineering', 'Design', 'Product'];
-
-  static const _categories = [
-    {'icon': Icons.code_rounded,              'label': 'Engineering',  'count': '8,420'},
-    {'icon': Icons.palette_outlined,          'label': 'Design',       'count': '2,150'},
-    {'icon': Icons.bar_chart_rounded,         'label': 'Data & AI',    'count': '3,200'},
-    {'icon': Icons.campaign_outlined,         'label': 'Marketing',    'count': '1,840'},
-    {'icon': Icons.account_balance_outlined,  'label': 'Finance',      'count': '1,320'},
-    {'icon': Icons.support_agent_outlined,    'label': 'Support',      'count': '950'},
-    {'icon': Icons.manage_accounts_outlined,  'label': 'Operations',   'count': '1,100'},
-    {'icon': Icons.storefront_outlined,       'label': 'Sales',        'count': '2,600'},
+  static const _tabs = [
+    ('All',         null,       null),
+    ('Remote',      null,       'Remote'),
+    ('Full-time',   'Full-time', null),
+    ('Contract',    'Contract',  null),
+    ('Engineering', 'Engineering', null),
+    ('Design',      'Design',    null),
+    ('Product',     'Product',   null),
   ];
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<JobProvider>().loadJobs(reset: true);
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) =>
+        context.read<JobProvider>().loadJobs(reset: true));
     _scrollCtrl.addListener(_onScroll);
   }
 
   void _onScroll() {
-    if (_scrollCtrl.position.pixels >= _scrollCtrl.position.maxScrollExtent - 200) {
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 200) {
       context.read<JobProvider>().loadJobs();
     }
   }
 
-  void _applySearch() {
-    final q = _searchCtrl.text.trim();
+  void _search() {
+    final kw = _keywordCtrl.text.trim();
     context.read<JobProvider>().applyFilters(
-      location:  _locationCtrl.text.trim().isEmpty ? null : _locationCtrl.text.trim(),
-      techStack: _techCtrl.text.trim().isEmpty ? (q.isEmpty ? null : q) : _techCtrl.text.trim(),
-      experience: _expCtrl.text.trim().isEmpty ? null : int.tryParse(_expCtrl.text.trim()),
+      techStack:  _techCtrl.text.trim().isNotEmpty
+          ? _techCtrl.text.trim()
+          : (kw.isNotEmpty ? kw : null),
+      location:   _locationCtrl.text.trim().isNotEmpty
+          ? _locationCtrl.text.trim()
+          : null,
+      experience: int.tryParse(_expCtrl.text.trim()),
     );
     setState(() => _showFilters = false);
   }
 
   void _clearAll() {
-    _searchCtrl.clear(); _locationCtrl.clear();
-    _techCtrl.clear(); _expCtrl.clear();
+    _keywordCtrl.clear();
+    _locationCtrl.clear();
+    _techCtrl.clear();
+    _expCtrl.clear();
     setState(() { _showFilters = false; _selectedTab = 0; });
     context.read<JobProvider>().applyFilters();
   }
 
   void _onTab(int i) {
     setState(() => _selectedTab = i);
-    final label = _tabs[i];
+    final (_, tech, loc) = _tabs[i];
     context.read<JobProvider>().applyFilters(
-      techStack: (i == 0) ? null : label,
-      location:  (label == 'Remote') ? 'Remote' : null,
+      techStack: tech,
+      location:  loc,
     );
+  }
+
+  Future<void> _logout() async {
+    await context.read<AuthProvider>().logout();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
   }
 
   @override
   void dispose() {
-    _searchCtrl.dispose(); _scrollCtrl.dispose();
-    _locationCtrl.dispose(); _techCtrl.dispose(); _expCtrl.dispose();
+    _keywordCtrl.dispose(); _locationCtrl.dispose();
+    _scrollCtrl.dispose(); _techCtrl.dispose(); _expCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final jobs = context.watch<JobProvider>();
-    final w    = MediaQuery.of(context).size.width;
-    // Centered max-width layout for web
+    final auth   = context.watch<AuthProvider>();
+    final jobs   = context.watch<JobProvider>();
+    final w      = MediaQuery.of(context).size.width;
     final isWide = w > 900;
-    final hPad   = isWide ? (w - 1100) / 2 : 0.0;
-    final pad     = EdgeInsets.symmetric(horizontal: hPad < 24 ? 24.0 : hPad);
+    final hPad   = isWide ? ((w - 1100) / 2).clamp(24.0, double.infinity) : 24.0;
+    final pad    = EdgeInsets.symmetric(horizontal: hPad);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         controller: _scrollCtrl,
         slivers: [
-          // ── Top nav bar ──────────────────────────────────────────────────
+
+          // ── Navbar ──────────────────────────────────────────────────────────
           SliverAppBar(
             floating: true, snap: true, pinned: false,
             backgroundColor: AppColors.surface,
@@ -109,60 +120,58 @@ class _HomeScreenState extends State<HomeScreen> {
             titleSpacing: 0,
             title: Padding(
               padding: pad,
-              child: Row(
-                children: [
-                  // Logo
-                  Row(children: [
-                    Container(
-                      width: 34, height: 34,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.work_outline_rounded,
-                            color: Colors.white, size: 18)),
-                    ),
-                    const SizedBox(width: 9),
-                    Text('Hireloop',
-                      style: GoogleFonts.inter(
-                        fontSize: 17, fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary)),
-                  ]),
-                  if (isWide) ...[
-                    const SizedBox(width: 40),
-                    _navLink('Find Jobs'),
-                    _navLink('Companies'),
-                    _navLink('Categories'),
-                    _navLink('Resources'),
-                  ],
-                  const Spacer(),
-                  if (isWide) ...[
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text('Sign in',
-                        style: GoogleFonts.inter(
-                          fontSize: 13, fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary)),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-                  // Post a job / logged-in indicator
+              child: Row(children: [
+                // Brand
+                Row(children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    width: 34, height: 34,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
-                      isWide ? 'Post a job' : (auth.email ?? 'U')[0].toUpperCase(),
-                      style: GoogleFonts.inter(
-                        fontSize: 13, fontWeight: FontWeight.w600,
-                        color: const Color(0xFF0D0F12)),
+                    child: const Center(
+                      child: Icon(Icons.work_outline_rounded,
+                          color: Color(0xFF0D0F12), size: 18)),
+                  ),
+                  const SizedBox(width: 9),
+                  Text('Hireloop',
+                    style: GoogleFonts.inter(
+                      fontSize: 17, fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary)),
+                ]),
+
+                if (isWide) ...[
+                  const SizedBox(width: 36),
+                  _navLink('Find Jobs',       active: true),
+                  _navLink('My Applications', active: false),
+                ],
+
+                const Spacer(),
+
+                // User info + logout
+                if (isWide) ...[
+                  Text(auth.email ?? '',
+                    style: GoogleFonts.inter(
+                      fontSize: 12, color: AppColors.textSecondary)),
+                  const SizedBox(width: 12),
+                ],
+                Tooltip(
+                  message: 'Sign out',
+                  child: InkWell(
+                    onTap: _logout,
+                    borderRadius: BorderRadius.circular(20),
+                    child: CircleAvatar(
+                      radius: 17,
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                      child: Text(
+                        (auth.email ?? 'U')[0].toUpperCase(),
+                        style: GoogleFonts.inter(
+                          fontSize: 13, fontWeight: FontWeight.w700,
+                          color: AppColors.primary)),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ]),
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
@@ -172,19 +181,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
           SliverToBoxAdapter(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ── Hero ───────────────────────────────────────────────────
                 _buildHero(pad),
-                // ── Stats ──────────────────────────────────────────────────
-                _buildStats(pad),
-                // ── Advanced filters (toggled) ────────────────────────────
-                if (_showFilters) _buildFilters(pad),
-                // ── Categories ─────────────────────────────────────────────
-                _buildCategories(pad, isWide),
-                // ── Jobs section ───────────────────────────────────────────
-                _buildJobsSection(pad, jobs),
-                const SizedBox(height: 40),
+                _buildFilterTabs(pad),
+                if (_showFilters) _buildAdvancedFilters(pad),
+                _buildJobsSection(pad, jobs, isWide),
+                const SizedBox(height: 60),
               ],
             ),
           ),
@@ -193,28 +196,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _navLink(String label) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 28),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Text(label,
-          style: GoogleFonts.inter(
-            fontSize: 14, color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500)),
-      ),
-    );
-  }
+  // ── Navbar link ────────────────────────────────────────────────────────────
+  Widget _navLink(String label, {required bool active}) => Padding(
+    padding: const EdgeInsets.only(right: 28),
+    child: MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Text(label,
+        style: GoogleFonts.inter(
+          fontSize: 14, fontWeight: FontWeight.w500,
+          color: active ? AppColors.textPrimary : AppColors.textSecondary)),
+    ),
+  );
 
+  // ── Hero / Search ──────────────────────────────────────────────────────────
   Widget _buildHero(EdgeInsets pad) {
     return Container(
       width: double.infinity,
-      padding: pad.add(const EdgeInsets.symmetric(vertical: 72)),
+      padding: pad.add(const EdgeInsets.symmetric(vertical: 60)),
       color: AppColors.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // ── Eyebrow pill ─────────────────────────────────────────────────
+          // Eyebrow pill
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
@@ -222,62 +225,59 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: AppColors.divider),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.auto_awesome_rounded,
-                    size: 13, color: AppColors.primary),
-                const SizedBox(width: 7),
-                Text('AI-matched roles, updated every hour',
-                  style: GoogleFonts.inter(
-                    fontSize: 12, color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500)),
-              ],
-            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(Icons.auto_awesome_rounded,
+                  size: 13, color: AppColors.primary),
+              const SizedBox(width: 7),
+              Text('AI-matched roles, updated every hour',
+                style: GoogleFonts.inter(
+                  fontSize: 12, color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500)),
+            ]),
           ),
+
           const SizedBox(height: 28),
 
-          // ── Headline ─────────────────────────────────────────────────────
+          // Headline
           Text('Find work that',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 56, fontWeight: FontWeight.w800,
+              fontSize: 52, fontWeight: FontWeight.w800,
               color: AppColors.textPrimary, height: 1.1,
               letterSpacing: -1.5)),
           Text('moves you forward.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 56, fontWeight: FontWeight.w800,
+              fontSize: 52, fontWeight: FontWeight.w800,
               color: AppColors.primary, height: 1.1,
               letterSpacing: -1.5)),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           Text(
-            'A curated marketplace of senior engineering, design, and product\nroles at companies that take craft seriously.',
+            'A curated marketplace of senior engineering, design,\nand product roles at companies that take craft seriously.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 16, color: AppColors.textSecondary, height: 1.65)),
+              fontSize: 15, color: AppColors.textSecondary, height: 1.65)),
 
           const SizedBox(height: 36),
 
-          // ── Search bar ───────────────────────────────────────────────────
-          Container(
+          // ── Two-field search bar ───────────────────────────────────────────
+          ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 760),
-            height: 56,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.divider),
-            ),
-            child: Row(
-              children: [
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Row(children: [
                 const SizedBox(width: 14),
-                const Icon(Icons.search_rounded, size: 18,
-                    color: AppColors.textMuted),
+                Icon(Icons.search_rounded, size: 18, color: AppColors.textMuted),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
-                    controller: _searchCtrl,
+                    controller: _keywordCtrl,
                     style: GoogleFonts.inter(
                         fontSize: 14, color: AppColors.textPrimary),
                     decoration: InputDecoration(
@@ -290,12 +290,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    onSubmitted: (_) => _applySearch(),
+                    onSubmitted: (_) => _search(),
                   ),
                 ),
                 Container(width: 1, height: 24, color: AppColors.divider),
                 const SizedBox(width: 14),
-                const Icon(Icons.location_on_outlined, size: 16,
+                Icon(Icons.location_on_outlined, size: 16,
                     color: AppColors.textMuted),
                 const SizedBox(width: 8),
                 Expanded(
@@ -313,12 +313,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    onSubmitted: (_) => _applySearch(),
+                    onSubmitted: (_) => _search(),
                   ),
                 ),
                 const SizedBox(width: 6),
                 GestureDetector(
-                  onTap: _applySearch,
+                  onTap: _search,
                   child: Container(
                     height: 56,
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -337,36 +337,39 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-              ],
+              ]),
             ),
           ),
 
           const SizedBox(height: 18),
 
-          // ── Trending tags ─────────────────────────────────────────────────
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          // Trending tags
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 6, runSpacing: 6,
             children: [
-              Text('Trending:  ',
+              Text('Trending:',
                 style: GoogleFonts.inter(
                   fontSize: 13, color: AppColors.textMuted,
                   fontWeight: FontWeight.w500)),
-              ...['Senior React', 'Product Designer', 'ML Engineer', 'Remote', 'Staff PM']
+              ...['Senior React', 'Flutter', 'ML Engineer', 'Remote', 'Staff PM']
                   .map((t) => GestureDetector(
                         onTap: () {
-                          _searchCtrl.text = t;
-                          _techCtrl.text   = t;
-                          _applySearch();
+                          _keywordCtrl.text = t;
+                          _techCtrl.text    = t;
+                          _search();
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.divider),
+                          ),
                           child: Text(t,
                             style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w400,
-                              decoration: TextDecoration.underline,
-                              decorationColor: AppColors.divider)),
+                              fontSize: 12, color: AppColors.textSecondary)),
                         ),
                       )),
             ],
@@ -376,318 +379,243 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStats(EdgeInsets pad) => Container(
-    width: double.infinity,
-    padding: pad.add(const EdgeInsets.symmetric(vertical: 20)),
-    decoration: BoxDecoration(
-      border: Border(
-        top: BorderSide(color: AppColors.divider),
-        bottom: BorderSide(color: AppColors.divider),
-      ),
-      color: AppColors.surface,
-    ),
-    child: Wrap(
-      spacing: 40, runSpacing: 12,
-      children: [
-        _stat('32k+', 'Open roles'),
-        _stat('8.4k', 'Hiring companies'),
-        _stat('120+', 'Countries'),
-        _stat('94%',  'Placement rate'),
-      ],
-    ),
-  );
-
-  Widget _stat(String value, String label) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(value,
-        style: GoogleFonts.inter(
-          fontSize: 18, fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary)),
-      const SizedBox(width: 8),
-      Text(label,
-        style: GoogleFonts.inter(
-          fontSize: 13, color: AppColors.textSecondary)),
-    ],
-  );
-
-  Widget _buildSearch(EdgeInsets pad) => Padding(
-    padding: pad.add(const EdgeInsets.only(top: 28, bottom: 4)),
-    child: Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _searchCtrl,
-            style: GoogleFonts.inter(
-                fontSize: 14, color: AppColors.textPrimary),
-            decoration: InputDecoration(
-              hintText: 'Search roles, companies, tech stack...',
-              prefixIcon: const Icon(Icons.search, size: 18,
-                  color: AppColors.textMuted),
-              suffixIcon: _searchCtrl.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, size: 16,
-                          color: AppColors.textMuted),
-                      onPressed: () { _searchCtrl.clear(); setState(() {}); _clearAll(); })
-                  : null,
-            ),
-            onChanged: (v) => setState(() {}),
-            onSubmitted: (_) => _applySearch(),
-          ),
+  // ── Filter tab row ─────────────────────────────────────────────────────────
+  Widget _buildFilterTabs(EdgeInsets pad) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          top:    BorderSide(color: AppColors.divider),
+          bottom: BorderSide(color: AppColors.divider),
         ),
-        const SizedBox(width: 8),
-        // Filters toggle
-        Tooltip(
-          message: 'Advanced filters',
-          child: InkWell(
+      ),
+      child: Padding(
+        padding: pad.add(const EdgeInsets.symmetric(vertical: 0)),
+        child: Row(children: [
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                children: List.generate(_tabs.length, (i) {
+                  final sel = _selectedTab == i;
+                  return GestureDetector(
+                    onTap: () => _onTab(i),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 140),
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: sel
+                            ? AppColors.primary.withValues(alpha: 0.12)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: sel ? AppColors.primary : AppColors.divider),
+                      ),
+                      child: Text(_tabs[i].$1,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+                          color: sel ? AppColors.primary : AppColors.textSecondary)),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+          // Advanced filter toggle
+          InkWell(
             onTap: () => setState(() => _showFilters = !_showFilters),
             borderRadius: BorderRadius.circular(8),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: 46, height: 46,
+              duration: const Duration(milliseconds: 140),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: _showFilters ? AppColors.primary : AppColors.surface,
+                color: _showFilters
+                    ? AppColors.primary.withValues(alpha: 0.12)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: _showFilters ? AppColors.primary : AppColors.inputBorder),
               ),
-              child: Icon(Icons.tune_rounded,
-                color: _showFilters ? Colors.white : AppColors.textSecondary,
-                size: 18),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.tune_rounded, size: 16,
+                    color: _showFilters ? AppColors.primary : AppColors.textSecondary),
+                const SizedBox(width: 6),
+                Text('Filters',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: _showFilters ? AppColors.primary : AppColors.textSecondary)),
+              ]),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        // Search button
-        SizedBox(
-          height: 46,
-          child: ElevatedButton(
-            onPressed: _applySearch,
-            style: ElevatedButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-            ),
-            child: Text('Search',
-              style: GoogleFonts.inter(
-                fontSize: 13, fontWeight: FontWeight.w600)),
-          ),
-        ),
-      ],
-    ),
-  );
-
-  Widget _buildFilters(EdgeInsets pad) => Container(
-    margin: pad.add(const EdgeInsets.only(top: 10)),
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: AppColors.cardBg,
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: AppColors.divider),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Refine results',
-          style: GoogleFonts.inter(
-            fontSize: 12, fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary)),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(child: _filterField(_locationCtrl, 'Location', Icons.location_on_outlined)),
-            const SizedBox(width: 10),
-            Expanded(child: _filterField(_techCtrl, 'Tech / Role', Icons.code_rounded)),
-            const SizedBox(width: 10),
-            Expanded(child: _filterField(_expCtrl, 'Max exp (yrs)',
-                Icons.workspace_premium_outlined, keyType: TextInputType.number)),
-            const SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: _applySearch,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 20)),
-              child: const Text('Apply'),
-            ),
-            const SizedBox(width: 8),
-            OutlinedButton(
-              onPressed: _clearAll,
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 44),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                side: const BorderSide(color: AppColors.divider),
-                foregroundColor: AppColors.textSecondary,
-              ),
-              child: const Text('Clear'),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-
-  Widget _filterField(TextEditingController ctrl, String hint, IconData icon,
-      {TextInputType keyType = TextInputType.text}) =>
-    SizedBox(
-      height: 44,
-      child: TextField(
-        controller: ctrl, keyboardType: keyType,
-        style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted),
-          prefixIcon: Icon(icon, size: 14, color: AppColors.textMuted),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          isDense: true,
-        ),
+        ]),
       ),
     );
+  }
 
-  Widget _buildCategories(EdgeInsets pad, bool isWide) {
-    final cols = isWide ? 8 : 4;
-    return Padding(
-      padding: pad.add(const EdgeInsets.only(top: 36, bottom: 8)),
+  // ── Advanced filters ───────────────────────────────────────────────────────
+  Widget _buildAdvancedFilters(EdgeInsets pad) {
+    return Container(
+      padding: pad.add(const EdgeInsets.symmetric(vertical: 16)),
+      color: AppColors.cardBg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Text('Refine results',
+            style: GoogleFonts.inter(
+              fontSize: 12, fontWeight: FontWeight.w600,
+              color: AppColors.textMuted,
+              letterSpacing: 0.5)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12, runSpacing: 10,
             children: [
-              Text('Explore by category',
-                style: GoogleFonts.inter(
-                  fontSize: 18, fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary)),
-              const Spacer(),
-              Text('View all →',
-                style: GoogleFonts.inter(
-                  fontSize: 13, color: AppColors.primary,
-                  fontWeight: FontWeight.w500)),
+              _filterChip(_techCtrl,  'Tech / Role',     Icons.code_rounded),
+              _filterChip(_expCtrl,   'Min Experience (yrs)',
+                  Icons.workspace_premium_outlined,
+                  keyType: TextInputType.number),
+              SizedBox(
+                height: 40,
+                child: ElevatedButton(
+                  onPressed: _search,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(horizontal: 20)),
+                  child: const Text('Apply'),
+                ),
+              ),
+              SizedBox(
+                height: 40,
+                child: OutlinedButton(
+                  onPressed: _clearAll,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    side: const BorderSide(color: AppColors.divider),
+                    foregroundColor: AppColors.textSecondary),
+                  child: const Text('Clear all'),
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: cols,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 1.1,
-            ),
-            itemCount: _categories.length,
-            itemBuilder: (_, i) {
-              final cat   = _categories[i];
-              final icon  = cat['icon'] as IconData;
-              final label = cat['label'] as String;
-              final count = cat['count'] as String;
-              final color = AppColors.badgeColors[i % AppColors.badgeColors.length];
-              return _CategoryCard(
-                icon: icon, label: label, count: count, color: color,
-                onTap: () {
-                  _techCtrl.text = label;
-                  context.read<JobProvider>().applyFilters(techStack: label);
-                },
-              );
-            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildJobsSection(EdgeInsets pad, JobProvider jobs) {
+  Widget _filterChip(TextEditingController c, String hint, IconData icon,
+      {TextInputType keyType = TextInputType.text}) =>
+      SizedBox(
+        width: 200, height: 40,
+        child: TextField(
+          controller: c,
+          keyboardType: keyType,
+          style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted),
+            prefixIcon: Icon(icon, size: 14, color: AppColors.textMuted),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          ),
+        ),
+      );
+
+  // ── Jobs section ───────────────────────────────────────────────────────────
+  Widget _buildJobsSection(EdgeInsets pad, JobProvider jobs, bool isWide) {
     return Padding(
-      padding: pad,
+      padding: pad.add(const EdgeInsets.only(top: 32)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 36),
           // Section header
           Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('Latest Opportunities',
+              Text('Open Positions',
                 style: GoogleFonts.inter(
-                  fontSize: 18, fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary)),
+                  fontSize: 20, fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary, letterSpacing: -0.4)),
               const SizedBox(width: 10),
-              if (!jobs.loading)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.divider),
-                  ),
-                  child: Text('${jobs.jobs.length} roles',
-                    style: GoogleFonts.inter(
-                      fontSize: 11, color: AppColors.textSecondary)),
-                ),
+              if (!jobs.loading && jobs.jobs.isNotEmpty)
+                Text('${jobs.jobs.length} roles',
+                  style: GoogleFonts.inter(
+                    fontSize: 13, color: AppColors.textMuted)),
+              const Spacer(),
+              if (jobs.loading && jobs.jobs.isNotEmpty)
+                const SizedBox(
+                  width: 14, height: 14,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: AppColors.primary)),
             ],
-          ),
-
-          const SizedBox(height: 14),
-
-          // Filter tabs
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(_tabs.length, (i) {
-                final sel = _selectedTab == i;
-                return GestureDetector(
-                  onTap: () => _onTab(i),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: sel ? AppColors.primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: sel ? AppColors.primary : AppColors.divider),
-                    ),
-                    child: Text(_tabs[i],
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
-                        color: sel ? Colors.white : AppColors.textSecondary)),
-                  ),
-                );
-              }),
-            ),
           ),
 
           const SizedBox(height: 20),
 
-          // Job list
-          if (jobs.jobs.isEmpty && jobs.loading)
-            const Padding(
-              padding: EdgeInsets.all(60),
-              child: Center(
-                child: CircularProgressIndicator(
-                    color: AppColors.primary, strokeWidth: 2)),
-            )
+          if (jobs.loading && jobs.jobs.isEmpty)
+            _loadingState()
           else if (jobs.jobs.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(60),
-              child: Center(
-                child: Column(children: [
-                  Icon(Icons.work_off_outlined,
-                      size: 48, color: AppColors.textMuted.withValues(alpha: 0.4)),
-                  const SizedBox(height: 12),
-                  Text('No jobs found',
-                    style: GoogleFonts.inter(
-                      fontSize: 15, color: AppColors.textSecondary)),
-                  const SizedBox(height: 4),
-                  Text('Try adjusting filters',
-                    style: GoogleFonts.inter(
-                      fontSize: 13, color: AppColors.textMuted)),
-                ]),
-              ),
-            )
+            _emptyState()
           else
-            _JobGrid(jobs: jobs, onTap: _openJob, featured: true),
+            _JobGrid(jobs: jobs, onTap: _openJob, isWide: isWide),
         ],
       ),
     );
   }
+
+  Widget _loadingState() => const Padding(
+    padding: EdgeInsets.symmetric(vertical: 80),
+    child: Center(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        SizedBox(
+          width: 28, height: 28,
+          child: CircularProgressIndicator(
+              strokeWidth: 2.5, color: AppColors.primary)),
+        SizedBox(height: 14),
+        Text('Loading jobs…',
+          style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+      ]),
+    ),
+  );
+
+  Widget _emptyState() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 80),
+    child: Center(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Container(
+          width: 72, height: 72,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: const Icon(Icons.search_off_rounded,
+              size: 32, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: 16),
+        Text('No jobs found',
+          style: GoogleFonts.inter(
+            fontSize: 16, fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary)),
+        const SizedBox(height: 6),
+        Text('Try different keywords or clear filters',
+          style: GoogleFonts.inter(
+            fontSize: 13, color: AppColors.textMuted)),
+        const SizedBox(height: 20),
+        OutlinedButton(
+          onPressed: _clearAll,
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppColors.divider),
+            foregroundColor: AppColors.textSecondary),
+          child: const Text('Clear filters'),
+        ),
+      ]),
+    ),
+  );
 
   void _openJob(job) {
     final appProvider = context.read<ApplicationProvider>();
@@ -700,42 +628,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ── Responsive job grid (2-col on wide, 1-col on narrow) ─────────────────────
+// ── Responsive 2-column job grid ──────────────────────────────────────────────
 class _JobGrid extends StatelessWidget {
   final JobProvider jobs;
   final Function(dynamic) onTap;
-  final bool featured;
-  const _JobGrid({required this.jobs, required this.onTap, this.featured = false});
+  final bool isWide;
+  const _JobGrid({required this.jobs, required this.onTap, required this.isWide});
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    final isWide = w > 900;
+    final list = jobs.jobs;
 
     if (isWide) {
-      // Two-column grid
       return Column(
         children: [
-          for (int i = 0; i < jobs.jobs.length; i += 2)
+          for (int i = 0; i < list.length; i += 2)
             Padding(
-              padding: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: JobCard(
-                      job: jobs.jobs[i],
-                      featured: featured && i % 3 == 0,
-                      onTap: () => onTap(jobs.jobs[i]),
+                      job: list[i],
+                      featured: i % 5 == 0,
+                      onTap: () => onTap(list[i]),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  if (i + 1 < jobs.jobs.length)
+                  const SizedBox(width: 12),
+                  if (i + 1 < list.length)
                     Expanded(
                       child: JobCard(
-                        job: jobs.jobs[i + 1],
-                        featured: featured && (i + 1) % 3 == 0,
-                        onTap: () => onTap(jobs.jobs[i + 1]),
+                        job: list[i + 1],
+                        featured: (i + 1) % 5 == 0,
+                        onTap: () => onTap(list[i + 1]),
                       ),
                     )
                   else
@@ -743,89 +669,35 @@ class _JobGrid extends StatelessWidget {
                 ],
               ),
             ),
-          if (jobs.hasMore)
-            const Padding(
-              padding: EdgeInsets.all(20),
-              child: Center(
-                child: CircularProgressIndicator(
-                    color: AppColors.primary, strokeWidth: 2)),
-            ),
+          _paginationFooter(jobs),
         ],
       );
     }
 
-    // Single-column list
     return Column(
       children: [
-        ...jobs.jobs.asMap().entries.map((e) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
+        ...list.asMap().entries.map((e) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
           child: JobCard(
             job: e.value,
-            featured: featured && e.key % 3 == 0,
+            featured: e.key % 5 == 0,
             onTap: () => onTap(e.value),
           ),
         )),
-        if (jobs.hasMore)
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(
-              child: CircularProgressIndicator(
-                  color: AppColors.primary, strokeWidth: 2)),
-          ),
+        _paginationFooter(jobs),
       ],
     );
   }
-}
 
-class _CategoryCard extends StatefulWidget {
-  final IconData icon;
-  final String label, count;
-  final Color color;
-  final VoidCallback onTap;
-  const _CategoryCard({required this.icon, required this.label,
-    required this.count, required this.color, required this.onTap});
-  @override
-  State<_CategoryCard> createState() => _CategoryCardState();
-}
-
-class _CategoryCardState extends State<_CategoryCard> {
-  bool _hovered = false;
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit:  (_) => setState(() => _hovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: _hovered ? AppColors.surface : AppColors.cardBg,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: _hovered
-                  ? widget.color.withValues(alpha: 0.4)
-                  : AppColors.divider),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(widget.icon, size: 22, color: widget.color),
-              const SizedBox(height: 6),
-              Text(widget.label,
-                style: GoogleFonts.inter(
-                  fontSize: 11, fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary),
-                textAlign: TextAlign.center,
-                maxLines: 1, overflow: TextOverflow.ellipsis),
-              Text(widget.count,
-                style: GoogleFonts.inter(
-                  fontSize: 10, color: AppColors.textMuted)),
-            ],
-          ),
-        ),
+  Widget _paginationFooter(JobProvider jobs) {
+    if (!jobs.hasMore) return const SizedBox.shrink();
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 28),
+      child: Center(
+        child: SizedBox(
+          width: 22, height: 22,
+          child: CircularProgressIndicator(
+              strokeWidth: 2.5, color: AppColors.primary)),
       ),
     );
   }

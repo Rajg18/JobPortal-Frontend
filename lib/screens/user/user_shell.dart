@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/constants/app_colors.dart';
 import '../../providers/application_provider.dart';
 import '../../providers/job_provider.dart';
 import '../../providers/profile_provider.dart';
@@ -11,7 +10,6 @@ import 'profile_screen.dart';
 
 class UserShell extends StatefulWidget {
   const UserShell({super.key});
-
   @override
   State<UserShell> createState() => _UserShellState();
 }
@@ -37,43 +35,69 @@ class _UserShellState extends State<UserShell> {
       ],
       child: Builder(
         builder: (ctx) => Scaffold(
+          // Each screen handles its own Scaffold/AppBar — no outer shell chrome
           body: IndexedStack(index: _index, children: _screens),
-          bottomNavigationBar: Container(
-            decoration: const BoxDecoration(
-              color: AppColors.background,
-              border: Border(
-                top: BorderSide(color: AppColors.divider, width: 1),
-              ),
-            ),
-            child: BottomNavigationBar(
-              currentIndex: _index,
-              onTap: (i) => setState(() => _index = i),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              selectedItemColor: AppColors.primary,
-              unselectedItemColor: AppColors.textMuted,
-              selectedLabelStyle: const TextStyle(
-                  fontSize: 11, fontWeight: FontWeight.w600),
-              unselectedLabelStyle: const TextStyle(fontSize: 11),
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.work_outline_rounded),
-                  activeIcon: Icon(Icons.work_rounded),
-                  label: 'Jobs',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.inbox_outlined),
-                  activeIcon: Icon(Icons.inbox_rounded),
-                  label: 'Applied',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline_rounded),
-                  activeIcon: Icon(Icons.person_rounded),
-                  label: 'Profile',
-                ),
-              ],
-            ),
+          bottomNavigationBar: _BottomNav(
+            index: _index,
+            onTap: (i) => setState(() => _index = i),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomNav extends StatelessWidget {
+  final int index;
+  final ValueChanged<int> onTap;
+  const _BottomNav({required this.index, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    // On wide screens, the nav is in each screen's AppBar; hide bottom nav
+    if (w > 900) return const SizedBox.shrink();
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF13151A),
+        border: Border(top: BorderSide(color: Color(0xFF252830), width: 1)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _item(0, Icons.work_outline_rounded,  Icons.work_rounded,          'Jobs'),
+              _item(1, Icons.inbox_outlined,         Icons.inbox_rounded,         'Applied'),
+              _item(2, Icons.person_outline_rounded, Icons.person_rounded,        'Profile'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _item(int i, IconData off, IconData on, String label) {
+    final sel = index == i;
+    return Expanded(
+      child: InkWell(
+        onTap: () => onTap(i),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(sel ? on : off,
+                size: 22,
+                color: sel ? const Color(0xFF10B981) : const Color(0xFF4B5263)),
+            const SizedBox(height: 3),
+            Text(label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+                color: sel ? const Color(0xFF10B981) : const Color(0xFF4B5263))),
+          ],
         ),
       ),
     );
