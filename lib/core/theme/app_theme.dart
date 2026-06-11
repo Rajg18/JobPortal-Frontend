@@ -16,7 +16,7 @@ class AppTheme {
         secondary:  AppColors.info,
         surface:    AppColors.surface,
         error:      AppColors.error,
-        onPrimary:  Colors.white,
+        onPrimary:  Color(0xFF0D0F12), // dark text on green button
         onSurface:  AppColors.textPrimary,
         onError:    Colors.white,
       ),
@@ -90,7 +90,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: const Color(0xFF0D0F12), // dark text on emerald
           minimumSize: const Size(double.infinity, 48),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),

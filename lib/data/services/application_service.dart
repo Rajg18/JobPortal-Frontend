@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_constants.dart';
 import '../models/application_model.dart';
@@ -11,14 +10,16 @@ class ApplicationService {
 
   Future<String> applyJob(int jobId) => _wrap(() async {
     final res = await http.post(Uri.parse('${ApiConstants.applyJob}/$jobId'), headers: _h)
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 60),
+            onTimeout: () => throw Exception('Timed out applying — please try again.'));
     if (res.statusCode == 200) return res.body;
     throw Exception(_extractError(res));
   });
 
   Future<List<ApplicationModel>> getMyApplications() => _wrap(() async {
     final res = await http.get(Uri.parse(ApiConstants.myApplications), headers: _h)
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 60),
+            onTimeout: () => throw Exception('Timed out loading applications.'));
     if (res.statusCode == 200) {
       final list = jsonDecode(res.body) as List<dynamic>;
       return list.map((e) => ApplicationModel.fromJson(e as Map<String, dynamic>)).toList();
@@ -28,7 +29,8 @@ class ApplicationService {
 
   Future<List<ApplicationModel>> getApplicantsForJob(int jobId) => _wrap(() async {
     final res = await http.get(Uri.parse('${ApiConstants.adminApplicants}/$jobId'), headers: _h)
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 60),
+            onTimeout: () => throw Exception('Timed out loading applicants.'));
     if (res.statusCode == 200) {
       final list = jsonDecode(res.body) as List<dynamic>;
       return list.map((e) => ApplicationModel.fromJson(e as Map<String, dynamic>)).toList();
@@ -41,7 +43,8 @@ class ApplicationService {
       Uri.parse('${ApiConstants.adminUpdateApp}/$appId'),
       headers: _h,
       body: jsonEncode({'status': status}),
-    ).timeout(const Duration(seconds: 15));
+    ).timeout(const Duration(seconds: 60),
+        onTimeout: () => throw Exception('Timed out updating status.'));
     if (res.statusCode == 200) return res.body;
     throw Exception(_extractError(res));
   });
@@ -49,8 +52,6 @@ class ApplicationService {
   Future<T> _wrap<T>(Future<T> Function() fn) async {
     try {
       return await fn();
-    } on SocketException {
-      throw Exception('Cannot reach server. Check your connection.');
     } catch (e) {
       if (e is Exception) rethrow;
       throw Exception('Unexpected error: $e');

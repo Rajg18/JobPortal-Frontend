@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_constants.dart';
 import '../models/profile_model.dart';
@@ -11,7 +10,8 @@ class ProfileService {
 
   Future<ProfileModel> getProfile() => _wrap(() async {
     final res = await http.get(Uri.parse(ApiConstants.getProfile), headers: _h)
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 60),
+            onTimeout: () => throw Exception('Timed out loading profile.'));
     if (res.statusCode == 200) return ProfileModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
     throw Exception('Profile not found');
   });
@@ -20,7 +20,7 @@ class ProfileService {
     required String skills,
     required String location,
     required String phone,
-    required int experience,
+    required int    experience,
   }) => _wrap(() async {
     final res = await http.post(
       Uri.parse(ApiConstants.saveProfile),
@@ -31,16 +31,17 @@ class ProfileService {
         'phone':      phone,
         'experience': experience,
       }),
-    ).timeout(const Duration(seconds: 15));
-    if (res.statusCode == 200) return ProfileModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    ).timeout(const Duration(seconds: 60),
+        onTimeout: () => throw Exception('Timed out saving profile.'));
+    if (res.statusCode == 200) {
+      return ProfileModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    }
     throw Exception('Failed to save profile');
   });
 
   Future<T> _wrap<T>(Future<T> Function() fn) async {
     try {
       return await fn();
-    } on SocketException {
-      throw Exception('Cannot reach server. Check your connection.');
     } catch (e) {
       if (e is Exception) rethrow;
       throw Exception('Unexpected error: $e');

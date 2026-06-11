@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_constants.dart';
 
@@ -10,54 +9,40 @@ class AuthService {
     required String password,
     required String role,
   }) async {
-    try {
-      final res = await http.post(
-        Uri.parse(ApiConstants.register),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name':     name,
-          'email':    email,
-          'password': password,
-          'roles':    role,
-        }),
-      ).timeout(const Duration(seconds: 15));
+    final res = await http.post(
+      Uri.parse(ApiConstants.register),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name':     name,
+        'email':    email,
+        'password': password,
+        'roles':    role,
+      }),
+    ).timeout(const Duration(seconds: 60),
+        onTimeout: () => throw Exception(
+            'Request timed out. The server may be waking up — please try again.'));
 
-      if (res.statusCode == 200) return res.body;
-      throw Exception(_extractError(res));
-    } on SocketException {
-      throw Exception('Cannot reach server. Make sure your backend is running.');
-    } on HttpException {
-      throw Exception('Network error. Check your connection.');
-    } catch (e) {
-      if (e is Exception) rethrow;
-      throw Exception('Unexpected error: $e');
-    }
+    if (res.statusCode == 200 || res.statusCode == 201) return res.body;
+    throw Exception(_extractError(res));
   }
 
   Future<String> login({
     required String email,
     required String password,
   }) async {
-    try {
-      final res = await http.post(
-        Uri.parse(ApiConstants.login),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': email, 'password': password}),
-      ).timeout(const Duration(seconds: 15));
+    final res = await http.post(
+      Uri.parse(ApiConstants.login),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': email, 'password': password}),
+    ).timeout(const Duration(seconds: 60),
+        onTimeout: () => throw Exception(
+            'Request timed out. The server may be waking up — please try again.'));
 
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body) as Map<String, dynamic>;
-        return data['token'] as String;
-      }
-      throw Exception(_extractError(res));
-    } on SocketException {
-      throw Exception('Cannot reach server. Make sure your backend is running.');
-    } on HttpException {
-      throw Exception('Network error. Check your connection.');
-    } catch (e) {
-      if (e is Exception) rethrow;
-      throw Exception('Unexpected error: $e');
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body) as Map<String, dynamic>;
+      return data['token'] as String;
     }
+    throw Exception(_extractError(res));
   }
 
   String _extractError(http.Response res) {

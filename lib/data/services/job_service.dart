@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_constants.dart';
 import '../models/job_model.dart';
@@ -27,7 +26,9 @@ class JobService {
 
     final uri = Uri.parse(ApiConstants.jobs).replace(queryParameters: params);
     return _wrap(() async {
-      final res = await http.get(uri, headers: _h).timeout(const Duration(seconds: 15));
+      final res = await http.get(uri, headers: _h)
+          .timeout(const Duration(seconds: 60),
+              onTimeout: () => throw Exception('Request timed out — server may be waking up, try again.'));
       if (res.statusCode == 200) {
         final data    = jsonDecode(res.body) as Map<String, dynamic>;
         final content = data['content'] as List<dynamic>;
@@ -39,7 +40,8 @@ class JobService {
 
   Future<JobModel> getJob(int id) => _wrap(() async {
     final res = await http.get(Uri.parse('${ApiConstants.jobs}/$id'), headers: _h)
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 60),
+            onTimeout: () => throw Exception('Timed out loading job.'));
     if (res.statusCode == 200) return JobModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
     throw Exception('Job not found');
   });
@@ -47,22 +49,24 @@ class JobService {
   Future<JobModel> createJob(JobModel job) => _wrap(() async {
     final res = await http.post(Uri.parse(ApiConstants.adminJobs),
         headers: _h, body: jsonEncode(job.toJson()))
-        .timeout(const Duration(seconds: 15));
-    if (res.statusCode == 200) return JobModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+        .timeout(const Duration(seconds: 60),
+            onTimeout: () => throw Exception('Timed out creating job.'));
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return JobModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    }
     throw Exception('Failed to create job');
   });
 
   Future<void> deleteJob(int id) => _wrap(() async {
     final res = await http.delete(Uri.parse('${ApiConstants.adminJobs}/$id'), headers: _h)
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 60),
+            onTimeout: () => throw Exception('Timed out deleting job.'));
     if (res.statusCode != 200) throw Exception('Failed to delete job');
   });
 
   Future<T> _wrap<T>(Future<T> Function() fn) async {
     try {
       return await fn();
-    } on SocketException {
-      throw Exception('Cannot reach server. Check your connection.');
     } catch (e) {
       if (e is Exception) rethrow;
       throw Exception('Unexpected error: $e');

@@ -105,49 +105,61 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: AppColors.surface,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
-            toolbarHeight: 60,
+            toolbarHeight: 64,
             titleSpacing: 0,
             title: Padding(
               padding: pad,
               child: Row(
                 children: [
                   // Logo
-                  Container(
-                    width: 30, height: 30,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(7),
+                  Row(children: [
+                    Container(
+                      width: 34, height: 34,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.work_outline_rounded,
+                            color: Colors.white, size: 18)),
                     ),
-                    child: const Center(
-                      child: Text('H',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800,
-                            color: Colors.white)),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text('HireLoop',
-                    style: GoogleFonts.inter(
-                      fontSize: 16, fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary)),
-                  const SizedBox(width: 32),
+                    const SizedBox(width: 9),
+                    Text('Hireloop',
+                      style: GoogleFonts.inter(
+                        fontSize: 17, fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary)),
+                  ]),
                   if (isWide) ...[
+                    const SizedBox(width: 40),
                     _navLink('Find Jobs'),
                     _navLink('Companies'),
                     _navLink('Categories'),
+                    _navLink('Resources'),
                   ],
                   const Spacer(),
-                  Text(auth.email ?? '',
-                    style: GoogleFonts.inter(
-                      fontSize: 12, color: AppColors.textSecondary)),
-                  const SizedBox(width: 12),
-                  CircleAvatar(
-                    radius: 15,
-                    backgroundColor: AppColors.primary,
+                  if (isWide) ...[
+                    GestureDetector(
+                      onTap: () {},
+                      child: Text('Sign in',
+                        style: GoogleFonts.inter(
+                          fontSize: 13, fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary)),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                  // Post a job / logged-in indicator
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     child: Text(
-                      (auth.email ?? 'U')[0].toUpperCase(),
+                      isWide ? 'Post a job' : (auth.email ?? 'U')[0].toUpperCase(),
                       style: GoogleFonts.inter(
-                        fontSize: 12, fontWeight: FontWeight.w700,
-                        color: Colors.white)),
+                        fontSize: 13, fontWeight: FontWeight.w600,
+                        color: const Color(0xFF0D0F12)),
+                    ),
                   ),
                 ],
               ),
@@ -166,8 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _buildHero(pad),
                 // ── Stats ──────────────────────────────────────────────────
                 _buildStats(pad),
-                // ── Search ─────────────────────────────────────────────────
-                _buildSearch(pad),
+                // ── Advanced filters (toggled) ────────────────────────────
                 if (_showFilters) _buildFilters(pad),
                 // ── Categories ─────────────────────────────────────────────
                 _buildCategories(pad, isWide),
@@ -182,78 +193,183 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _navLink(String label) => Padding(
-    padding: const EdgeInsets.only(right: 24),
-    child: Text(label,
-      style: GoogleFonts.inter(
-        fontSize: 13, color: AppColors.textSecondary,
-        fontWeight: FontWeight.w500)),
-  );
+  Widget _navLink(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 28),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Text(label,
+          style: GoogleFonts.inter(
+            fontSize: 14, color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500)),
+      ),
+    );
+  }
 
   Widget _buildHero(EdgeInsets pad) {
     return Container(
       width: double.infinity,
-      padding: pad.add(const EdgeInsets.symmetric(vertical: 56)),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF09090B), Color(0xFF131318), Color(0xFF09090B)],
-        ),
-      ),
+      padding: pad.add(const EdgeInsets.symmetric(vertical: 72)),
+      color: AppColors.background,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Eyebrow
+          // ── Eyebrow pill ─────────────────────────────────────────────────
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
-              color: AppColors.accentBg,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.divider),
             ),
-            child: Text('32k+ open roles across 120+ countries',
-              style: GoogleFonts.inter(
-                fontSize: 12, color: AppColors.primaryLight,
-                fontWeight: FontWeight.w500)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.auto_awesome_rounded,
+                    size: 13, color: AppColors.primary),
+                const SizedBox(width: 7),
+                Text('AI-matched roles, updated every hour',
+                  style: GoogleFonts.inter(
+                    fontSize: 12, color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500)),
+              ],
+            ),
           ),
-          const SizedBox(height: 20),
-          // Headline
-          Text('Find work that\nmoves you forward',
-            style: GoogleFonts.inter(
-              fontSize: 44, fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary, height: 1.15,
-              letterSpacing: -1.0)),
-          const SizedBox(height: 14),
-          Text('A curated marketplace of senior engineering,\ndesign, and product roles.',
-            style: GoogleFonts.inter(
-              fontSize: 15, color: AppColors.textSecondary, height: 1.6)),
           const SizedBox(height: 28),
-          // Trending tags
-          Wrap(
-            spacing: 8, runSpacing: 8,
-            children: ['Flutter', 'Java', 'React', 'Python', 'Remote', 'Kotlin']
-                .map((t) => GestureDetector(
-                      onTap: () {
-                        _searchCtrl.text = t;
-                        _techCtrl.text = t;
-                        _applySearch();
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.divider),
-                        ),
-                        child: Text(t,
-                          style: GoogleFonts.inter(
-                            fontSize: 12, color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500)),
+
+          // ── Headline ─────────────────────────────────────────────────────
+          Text('Find work that',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 56, fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary, height: 1.1,
+              letterSpacing: -1.5)),
+          Text('moves you forward.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 56, fontWeight: FontWeight.w800,
+              color: AppColors.primary, height: 1.1,
+              letterSpacing: -1.5)),
+
+          const SizedBox(height: 18),
+          Text(
+            'A curated marketplace of senior engineering, design, and product\nroles at companies that take craft seriously.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 16, color: AppColors.textSecondary, height: 1.65)),
+
+          const SizedBox(height: 36),
+
+          // ── Search bar ───────────────────────────────────────────────────
+          Container(
+            constraints: const BoxConstraints(maxWidth: 760),
+            height: 56,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 14),
+                const Icon(Icons.search_rounded, size: 18,
+                    color: AppColors.textMuted),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: _searchCtrl,
+                    style: GoogleFonts.inter(
+                        fontSize: 14, color: AppColors.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Job title, keyword, or company',
+                      hintStyle: GoogleFonts.inter(
+                          fontSize: 14, color: AppColors.textMuted),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onSubmitted: (_) => _applySearch(),
+                  ),
+                ),
+                Container(width: 1, height: 24, color: AppColors.divider),
+                const SizedBox(width: 14),
+                const Icon(Icons.location_on_outlined, size: 16,
+                    color: AppColors.textMuted),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _locationCtrl,
+                    style: GoogleFonts.inter(
+                        fontSize: 14, color: AppColors.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: "Location or 'Remote'",
+                      hintStyle: GoogleFonts.inter(
+                          fontSize: 14, color: AppColors.textMuted),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onSubmitted: (_) => _applySearch(),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: _applySearch,
+                  child: Container(
+                    height: 56,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(9),
+                        bottomRight: Radius.circular(9),
                       ),
-                    ))
-                .toList(),
+                    ),
+                    child: Center(
+                      child: Text('Search jobs',
+                        style: GoogleFonts.inter(
+                          fontSize: 14, fontWeight: FontWeight.w600,
+                          color: const Color(0xFF0D0F12))),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // ── Trending tags ─────────────────────────────────────────────────
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Trending:  ',
+                style: GoogleFonts.inter(
+                  fontSize: 13, color: AppColors.textMuted,
+                  fontWeight: FontWeight.w500)),
+              ...['Senior React', 'Product Designer', 'ML Engineer', 'Remote', 'Staff PM']
+                  .map((t) => GestureDetector(
+                        onTap: () {
+                          _searchCtrl.text = t;
+                          _techCtrl.text   = t;
+                          _applySearch();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Text(t,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w400,
+                              decoration: TextDecoration.underline,
+                              decorationColor: AppColors.divider)),
+                        ),
+                      )),
+            ],
           ),
         ],
       ),
