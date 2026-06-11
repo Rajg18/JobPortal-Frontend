@@ -40,7 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Account created! Please sign in.'),
+        content: Text('Account created! Please log in.'),
         backgroundColor: AppColors.success,
       ));
       Navigator.of(context).pop();
@@ -221,7 +221,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     color: AppColors.textSecondary)),
                                 GestureDetector(
                                   onTap: () => Navigator.pop(context),
-                                  child: Text('Sign In',
+                                  child: Text('Log In',
                                     style: GoogleFonts.inter(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
