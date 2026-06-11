@@ -40,7 +40,7 @@ class _UserShellState extends State<UserShell> {
                 onGoToProfile:      () => _goTo(2),
               ),
               const MyApplicationsScreen(),
-              const ProfileScreen(),
+              ProfileScreen(onBack: () => _goTo(0)),
             ],
           ),
           bottomNavigationBar: _BottomNav(

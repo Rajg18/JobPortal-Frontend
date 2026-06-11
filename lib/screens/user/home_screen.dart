@@ -292,11 +292,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 36),
 
-          // ── Search bar ──────────────────────────────────────────────────
+          // ── Search bar — single row ──────────────────────────────────────
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Container(
-              height: 56,
+              height: 52,
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(10),
@@ -312,30 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.inter(
                         fontSize: 14, color: AppColors.textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Role or tech stack  (e.g. Flutter, Java)',
-                      hintStyle: GoogleFonts.inter(
-                          fontSize: 14, color: AppColors.textMuted),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    onSubmitted: (_) => _onSearch(),
-                  ),
-                ),
-                Container(width: 1, height: 26, color: AppColors.divider),
-                const SizedBox(width: 14),
-                Icon(Icons.location_on_outlined, size: 16,
-                    color: AppColors.textMuted),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _locationCtrl,
-                    style: GoogleFonts.inter(
-                        fontSize: 14, color: AppColors.textPrimary),
-                    decoration: InputDecoration(
-                      hintText: "Location or 'Remote'",
+                      hintText: 'Search by role, skill or keyword…',
                       hintStyle: GoogleFonts.inter(
                           fontSize: 14, color: AppColors.textMuted),
                       border: InputBorder.none,
@@ -351,8 +328,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 GestureDetector(
                   onTap: _onSearch,
                   child: Container(
-                    height: 56,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    height: 52,
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: const BorderRadius.only(
@@ -361,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     child: Center(
-                      child: Text('Search jobs',
+                      child: Text('Search',
                         style: GoogleFonts.inter(
                           fontSize: 14, fontWeight: FontWeight.w600,
                           color: const Color(0xFF0D0F12))),

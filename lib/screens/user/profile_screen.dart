@@ -8,7 +8,8 @@ import '../../widgets/app_text_field.dart';
 import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onBack; // navigates back to the Jobs tab
+  const ProfileScreen({super.key, this.onBack});
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -106,6 +107,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: Padding(
                   padding: pad,
                   child: Row(children: [
+                    // Back to Jobs
+                    if (widget.onBack != null) ...[
+                      _iconBtn(Icons.arrow_back_rounded, 'Back to Jobs',
+                          widget.onBack!),
+                      const SizedBox(width: 8),
+                    ],
                     Text('My Profile',
                       style: GoogleFonts.inter(
                         fontSize: 18, fontWeight: FontWeight.w700,
