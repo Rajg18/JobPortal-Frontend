@@ -40,26 +40,36 @@ class _UserShellState extends State<UserShell> {
           body: IndexedStack(index: _index, children: _screens),
           bottomNavigationBar: Container(
             decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.divider)),
+              color: AppColors.background,
+              border: Border(
+                top: BorderSide(color: AppColors.divider, width: 1),
+              ),
             ),
             child: BottomNavigationBar(
               currentIndex: _index,
-              onTap:        (i) => setState(() => _index = i),
+              onTap: (i) => setState(() => _index = i),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              selectedItemColor: AppColors.primary,
+              unselectedItemColor: AppColors.textMuted,
+              selectedLabelStyle: const TextStyle(
+                  fontSize: 11, fontWeight: FontWeight.w600),
+              unselectedLabelStyle: const TextStyle(fontSize: 11),
               items: const [
                 BottomNavigationBarItem(
-                  icon:      Icon(Icons.work_outline),
+                  icon: Icon(Icons.work_outline_rounded),
                   activeIcon: Icon(Icons.work_rounded),
-                  label:     'Jobs',
+                  label: 'Jobs',
                 ),
                 BottomNavigationBarItem(
-                  icon:      Icon(Icons.inbox_outlined),
+                  icon: Icon(Icons.inbox_outlined),
                   activeIcon: Icon(Icons.inbox_rounded),
-                  label:     'Applied',
+                  label: 'Applied',
                 ),
                 BottomNavigationBarItem(
-                  icon:      Icon(Icons.person_outline),
+                  icon: Icon(Icons.person_outline_rounded),
                   activeIcon: Icon(Icons.person_rounded),
-                  label:     'Profile',
+                  label: 'Profile',
                 ),
               ],
             ),

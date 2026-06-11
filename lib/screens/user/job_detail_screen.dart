@@ -14,15 +14,13 @@ class JobDetailScreen extends StatefulWidget {
 }
 
 class _JobDetailScreenState extends State<JobDetailScreen> {
-  bool _applying  = false;
-  bool _applied   = false;   // turns true after a successful apply in this session
+  bool _applying = false;
+  bool _applied  = false;
 
   Future<void> _apply() async {
     if (_applying || _applied) return;
-
     setState(() => _applying = true);
 
-    // ApplicationProvider was passed via ChangeNotifierProvider.value from HomeScreen.
     final provider = context.read<ApplicationProvider>();
     final ok = await provider.applyJob(widget.job.id);
 
@@ -34,213 +32,283 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       ok
-          ? const SnackBar(
-              content: Text('🎉 Application submitted successfully!'),
-              backgroundColor: AppColors.success,
-            )
+          ? const SnackBar(content: Text('Application submitted successfully!'))
           : SnackBar(
-              content: Text(provider.error ?? 'Failed to apply. Please try again.'),
-              backgroundColor: AppColors.error,
-            ),
+              content: Text(provider.error ?? 'Failed to apply.'),
+              backgroundColor: AppColors.error),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final job = widget.job;
+    final badgeColor = AppColors.badgeFor(job.companyName);
+    final tags = job.techStack
+        .split(RegExp(r'[,|/\s]+'))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .toList();
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Job Details'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          icon: const Icon(Icons.arrow_back_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bookmark_border_rounded,
+                color: AppColors.textSecondary, size: 20),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Company header ─────────────────────────────────────────────
-            Row(
+            // ── Company header card ────────────────────────────────────────
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: badgeColor,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Center(
+                      child: Text(
+                        job.companyName.isNotEmpty
+                            ? job.companyName[0].toUpperCase()
+                            : '?',
+                        style: GoogleFonts.inter(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(job.title,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          )),
+                        const SizedBox(height: 3),
+                        Text(job.companyName,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary,
+                          )),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // ── Info pills ────────────────────────────────────────────────
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Container(
-                  width: 60, height: 60,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.gold, AppColors.goldLight],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Center(
-                    child: Text(
-                      job.companyName.isNotEmpty
-                          ? job.companyName[0].toUpperCase()
-                          : '?',
-                      style: GoogleFonts.poppins(
-                        fontSize: 24, fontWeight: FontWeight.w800,
-                        color: AppColors.background),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(job.companyName,
-                        style: GoogleFonts.poppins(
-                          fontSize: 16, fontWeight: FontWeight.w700,
-                          color: AppColors.gold)),
-                      Text(job.title,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14, color: AppColors.textSecondary)),
-                    ],
-                  ),
-                ),
+                _infoPill(Icons.location_on_outlined, job.location,
+                    AppColors.info),
+                _infoPill(Icons.workspace_premium_outlined,
+                    '${job.experienceRequired}+ yrs exp',
+                    AppColors.warning),
+                _infoPill(Icons.person_outline,
+                    'by ${job.postedBy}', AppColors.accent),
               ],
             ),
 
             const SizedBox(height: 24),
 
-            // ── Info chips ────────────────────────────────────────────────
+            // ── About section ─────────────────────────────────────────────
+            _sectionHeading('About this role'),
+            const SizedBox(height: 10),
+            Text(job.description,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+                height: 1.7,
+              )),
+
+            const SizedBox(height: 24),
+
+            // ── Skills section ────────────────────────────────────────────
+            _sectionHeading('Skills & Tech Stack'),
+            const SizedBox(height: 10),
             Wrap(
-              spacing: 10, runSpacing: 10,
-              children: [
-                _infoChip(Icons.location_on_outlined, job.location),
-                _infoChip(Icons.code_outlined, job.techStack),
-                _infoChip(Icons.workspace_premium_outlined,
-                    '${job.experienceRequired}+ years'),
-                _infoChip(Icons.person_outline, 'Posted by ${job.postedBy}'),
-              ],
+              spacing: 8,
+              runSpacing: 8,
+              children: tags
+                  .map((t) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentLight,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(t,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.accent,
+                          )),
+                      ))
+                  .toList(),
             ),
 
-            const SizedBox(height: 28),
-            _sectionTitle('About this role'),
+            const SizedBox(height: 24),
+
+            // ── Requirements ──────────────────────────────────────────────
+            _sectionHeading('Requirements'),
             const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color:        AppColors.cardBg,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border:       Border.all(color: AppColors.divider),
+                border: Border.all(color: AppColors.divider),
               ),
-              child: Text(job.description,
-                style: GoogleFonts.poppins(
-                  fontSize: 14, color: AppColors.textSecondary, height: 1.7)),
+              child: Column(
+                children: [
+                  _reqRow('Tech Stack', job.techStack, Icons.code_rounded),
+                  Divider(height: 1, color: AppColors.divider),
+                  _reqRow('Location', job.location,
+                      Icons.location_on_outlined),
+                  Divider(height: 1, color: AppColors.divider),
+                  _reqRow('Experience',
+                      '${job.experienceRequired}+ years',
+                      Icons.workspace_premium_outlined),
+                ],
+              ),
             ),
-
-            const SizedBox(height: 28),
-            _sectionTitle('Requirements'),
-            const SizedBox(height: 10),
-            _requirementRow(Icons.code, 'Tech Stack', job.techStack),
-            _requirementRow(Icons.location_city, 'Location', job.location),
-            _requirementRow(Icons.star_border_purple500,
-                'Experience Required', '${job.experienceRequired}+ years'),
 
             const SizedBox(height: 100),
           ],
         ),
       ),
 
-      // ── Apply button bar ──────────────────────────────────────────────────
+      // ── Bottom apply bar ──────────────────────────────────────────────────
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 30),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
         decoration: const BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.background,
           border: Border(top: BorderSide(color: AppColors.divider)),
         ),
         child: _applied
-            // ── Already applied state ──────────────────────────────────────
             ? Container(
-                height: 52,
+                height: 50,
                 decoration: BoxDecoration(
-                  color:        AppColors.success.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
+                  color: AppColors.success.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: AppColors.success.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.check_circle_outline,
-                        color: AppColors.success, size: 20),
-                    const SizedBox(width: 10),
+                    const Icon(Icons.check_circle_outline_rounded,
+                        color: AppColors.success, size: 18),
+                    const SizedBox(width: 8),
                     Text('Application Submitted',
-                      style: GoogleFonts.poppins(
-                        fontSize: 15, fontWeight: FontWeight.w700,
-                        color: AppColors.success)),
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.success,
+                      )),
                   ],
                 ),
               )
-            // ── Apply now button ──────────────────────────────────────────
             : SizedBox(
-                height: 52,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: _applying ? null : _apply,
                   child: _applying
                       ? const SizedBox(
-                          width: 22, height: 22,
+                          width: 20,
+                          height: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: AppColors.background))
-                      : const Text('Apply Now'),
+                              strokeWidth: 2, color: Colors.white))
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Apply Now'),
+                            const SizedBox(width: 6),
+                            const Icon(Icons.arrow_forward_rounded, size: 16),
+                          ],
+                        ),
                 ),
               ),
       ),
     );
   }
 
-  Widget _sectionTitle(String title) => Text(title,
-    style: GoogleFonts.poppins(
-      fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary));
+  Widget _sectionHeading(String title) => Text(title,
+    style: GoogleFonts.inter(
+      fontSize: 15, fontWeight: FontWeight.w700,
+      color: AppColors.textPrimary));
 
-  Widget _infoChip(IconData icon, String label) {
+  Widget _infoPill(IconData icon, String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color:        AppColors.cardBg,
-        borderRadius: BorderRadius.circular(10),
-        border:       Border.all(color: AppColors.divider),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: AppColors.gold),
-          const SizedBox(width: 6),
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 5),
           Text(label,
-            style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary)),
+            style: GoogleFonts.inter(
+              fontSize: 12, fontWeight: FontWeight.w500, color: color)),
         ],
       ),
     );
   }
 
-  Widget _requirementRow(IconData icon, String key, String value) {
+  Widget _reqRow(String key, String value, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color:        AppColors.cardBg,
-              borderRadius: BorderRadius.circular(8),
+          Icon(icon, size: 16, color: AppColors.textMuted),
+          const SizedBox(width: 10),
+          Text('$key  ',
+            style: GoogleFonts.inter(
+              fontSize: 12, color: AppColors.textMuted)),
+          Expanded(
+            child: Text(value,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+              textAlign: TextAlign.end,
             ),
-            child: Icon(icon, size: 16, color: AppColors.skyBlue),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(key,
-                style: GoogleFonts.poppins(
-                    fontSize: 11, color: AppColors.textMuted)),
-              Text(value,
-                style: GoogleFonts.poppins(
-                  fontSize: 13, fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary)),
-            ],
           ),
         ],
       ),

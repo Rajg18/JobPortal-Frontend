@@ -51,211 +51,162 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth   = context.watch<AuthProvider>();
-    final size   = MediaQuery.of(context).size;
+    final auth = context.watch<AuthProvider>();
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      // ── Gradient background ────────────────────────────────────────────────
-      body: Container(
-        width:  double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end:   Alignment.bottomRight,
-            colors: [
-              Color(0xFF060F1E), // very dark navy
-              Color(0xFF0A1628), // deep navy
-              Color(0xFF0D1F3A), // slightly warmer navy
-            ],
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: size.width > 600 ? size.width * 0.2 : 24,
-                vertical: 24,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // ── Logo mark (above card) ───────────────────────────────
-                  Container(
-                    width: 64, height: 64,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.gold, AppColors.goldLight],
-                        begin:  Alignment.topLeft,
-                        end:    Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color:        AppColors.gold.withValues(alpha: 0.35),
-                          blurRadius:   24,
-                          spreadRadius: 0,
-                          offset:       const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(Icons.work_outline_rounded,
-                        color: AppColors.background, size: 30),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: size.width > 600 ? size.width * 0.2 : 24,
+              vertical: 32,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── Logo ──────────────────────────────────────────────────
+                Container(
+                  width: 56, height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  const SizedBox(height: 16),
-                  Text('JobPortal',
-                    style: GoogleFonts.poppins(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.5,
-                    )),
-                  const SizedBox(height: 4),
-                  Text('Your career starts here',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13, color: AppColors.textMuted)),
+                  child: const Center(
+                    child: Text('H',
+                      style: TextStyle(
+                        fontSize: 26, fontWeight: FontWeight.w800,
+                        color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text('HireLoop',
+                  style: GoogleFonts.inter(
+                    fontSize: 24, fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary, letterSpacing: -0.5)),
+                const SizedBox(height: 4),
+                Text('Find work that moves you forward',
+                  style: GoogleFonts.inter(
+                    fontSize: 13, color: AppColors.textMuted)),
 
-                  const SizedBox(height: 32),
+                const SizedBox(height: 36),
 
-                  // ── Floating card ────────────────────────────────────────
-                  Container(
-                    padding: const EdgeInsets.all(28),
-                    decoration: BoxDecoration(
-                      color:  AppColors.surface,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: AppColors.divider.withValues(alpha: 0.8)),
-                      boxShadow: [
-                        BoxShadow(
-                          color:       Colors.black.withValues(alpha: 0.4),
-                          blurRadius:  40,
-                          spreadRadius: 0,
-                          offset:      const Offset(0, 16),
+                // ── Card ─────────────────────────────────────────────────
+                Container(
+                  padding: const EdgeInsets.all(26),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.divider),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Welcome back',
+                          style: GoogleFonts.inter(
+                            fontSize: 20, fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary)),
+                        const SizedBox(height: 2),
+                        Text('Sign in to your account',
+                          style: GoogleFonts.inter(
+                            fontSize: 13, color: AppColors.textMuted)),
+
+                        const SizedBox(height: 22),
+
+                        AppTextField(
+                          controller:   _emailCtrl,
+                          label:        'Email',
+                          hint:         'you@example.com',
+                          prefixIcon:   Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) =>
+                              (v == null || v.isEmpty) ? 'Email is required' : null,
                         ),
-                      ],
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Welcome back',
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            )),
-                          const SizedBox(height: 2),
-                          Text('Sign in to your account',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12, color: AppColors.textMuted)),
-
-                          const SizedBox(height: 24),
-
-                          AppTextField(
-                            controller:   _emailCtrl,
-                            label:        'Email',
-                            hint:         'you@example.com',
-                            prefixIcon:   Icons.email_outlined,
-                            keyboardType: TextInputType.emailAddress,
-                            validator:    (v) =>
-                                (v == null || v.isEmpty) ? 'Email is required' : null,
+                        const SizedBox(height: 12),
+                        AppTextField(
+                          controller:  _passCtrl,
+                          label:       'Password',
+                          prefixIcon:  Icons.lock_outline,
+                          obscureText: _obscure,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscure
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: AppColors.textMuted, size: 18),
+                            onPressed: () =>
+                                setState(() => _obscure = !_obscure),
                           ),
-                          const SizedBox(height: 14),
-                          AppTextField(
-                            controller:  _passCtrl,
-                            label:       'Password',
-                            prefixIcon:  Icons.lock_outline,
-                            obscureText: _obscure,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscure
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: AppColors.textMuted, size: 18),
-                              onPressed: () =>
-                                  setState(() => _obscure = !_obscure),
-                            ),
-                            validator: (v) =>
-                                (v == null || v.isEmpty) ? 'Password is required' : null,
+                          validator: (v) =>
+                              (v == null || v.isEmpty) ? 'Password is required' : null,
+                        ),
+
+                        const SizedBox(height: 22),
+
+                        SizedBox(
+                          width: double.infinity, height: 50,
+                          child: ElevatedButton(
+                            onPressed: auth.loading ? null : _submit,
+                            child: auth.loading
+                                ? const SizedBox(
+                                    width: 20, height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: Colors.white))
+                                : const Text('Sign In'),
                           ),
+                        ),
 
-                          const SizedBox(height: 24),
+                        const SizedBox(height: 18),
 
-                          // Sign-in button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              onPressed: auth.loading ? null : _submit,
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              ),
-                              child: auth.loading
-                                  ? const SizedBox(
-                                      width: 20, height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.background))
-                                  : const Text('Sign In'),
-                            ),
+                        Row(children: [
+                          const Expanded(child: Divider()),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('or',
+                              style: GoogleFonts.inter(
+                                fontSize: 12, color: AppColors.textMuted)),
                           ),
+                          const Expanded(child: Divider()),
+                        ]),
 
-                          const SizedBox(height: 20),
+                        const SizedBox(height: 14),
 
-                          // Divider
-                          Row(children: [
-                            const Expanded(child: Divider()),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text('or',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12, color: AppColors.textMuted)),
-                            ),
-                            const Expanded(child: Divider()),
-                          ]),
-
-                          const SizedBox(height: 16),
-
-                          // Register link
-                          Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text("Don't have an account? ",
-                                  style: GoogleFonts.poppins(
+                        Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text("Don't have an account? ",
+                                style: GoogleFonts.inter(
+                                  fontSize: 13, color: AppColors.textSecondary)),
+                              GestureDetector(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const RegisterScreen())),
+                                child: Text('Register',
+                                  style: GoogleFonts.inter(
                                     fontSize: 13,
-                                    color: AppColors.textSecondary)),
-                                GestureDetector(
-                                  onTap: () => Navigator.push(context,
-                                    MaterialPageRoute(
-                                        builder: (_) => const RegisterScreen())),
-                                  child: Text('Register',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.gold)),
-                                ),
-                              ],
-                            ),
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.accent)),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // ── Footer ───────────────────────────────────────────────
-                  Text('Secure · Fast · Professional',
-                    style: GoogleFonts.poppins(
-                      fontSize: 11, color: AppColors.textMuted,
-                      letterSpacing: 1.2)),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
