@@ -51,4 +51,11 @@ class AppColors {
     if (name.isEmpty) return badgeColors[0];
     return badgeColors[name.codeUnitAt(0) % badgeColors.length];
   }
+
+  // ── Legacy aliases (used in admin/profile screens) ───────────────────────
+  static const Color gold      = accent;
+  static const Color goldLight = Color(0xFF818CF8); // indigo-400
+  static const Color skyBlue   = info;
+  static const Color inputFocusLegacy = inputFocus;
+  static const Color cardBgDark = Color(0xFFF1F5F9); // light slate for tinted bg
 }
