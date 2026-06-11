@@ -9,21 +9,21 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (color, bg, label) = switch (status.toUpperCase()) {
-      'ACCEPTED' => (AppColors.success,  AppColors.success.withValues(alpha: 0.15),  'Accepted'),
-      'REJECTED' => (AppColors.error,    AppColors.error.withValues(alpha: 0.15),    'Rejected'),
-      _          => (AppColors.warning,  AppColors.warning.withValues(alpha: 0.15),  'Pending'),
+      'ACCEPTED' => (AppColors.success, const Color(0xFFD1FAE5), 'Accepted'),
+      'REJECTED' => (AppColors.error,   const Color(0xFFFEE2E2), 'Rejected'),
+      'APPLIED'  => (AppColors.info,    const Color(0xFFDBEAFE), 'Applied'),
+      _          => (AppColors.warning,  const Color(0xFFFEF3C7), 'Pending'),
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color:        bg,
-        borderRadius: BorderRadius.circular(20),
-        border:       Border.all(color: color.withValues(alpha: 0.4)),
+        color: bg,
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         label,
-        style: GoogleFonts.poppins(
+        style: GoogleFonts.inter(
           fontSize: 11, fontWeight: FontWeight.w600, color: color),
       ),
     );
