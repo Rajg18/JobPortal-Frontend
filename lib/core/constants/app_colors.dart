@@ -1,61 +1,59 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // ── Background layers ────────────────────────────────────────────────────
-  static const Color background  = Color(0xFFFFFFFF); // Pure white
-  static const Color surface     = Color(0xFFF8FAFC); // Off-white surface
-  static const Color cardBg      = Color(0xFFFFFFFF); // White cards
-  static const Color divider     = Color(0xFFE2E8F0); // Soft border
+  // ── Base backgrounds ─────────────────────────────────────────────────────
+  static const Color background  = Color(0xFF09090B); // zinc-950 near-black
+  static const Color surface     = Color(0xFF141416); // slightly lifted surface
+  static const Color cardBg      = Color(0xFF1C1C1F); // zinc-900 card
+  static const Color divider     = Color(0xFF2E2E33); // zinc-800 border
 
-  // ── Primary / Brand ──────────────────────────────────────────────────────
-  static const Color primary      = Color(0xFF0F172A); // Near-black navy
-  static const Color accent       = Color(0xFF6366F1); // Indigo
-  static const Color accentLight  = Color(0xFFEEF2FF); // Indigo tint bg
-  static const Color accentDark   = Color(0xFF4F46E5); // Darker indigo
+  // ── Brand / Primary ──────────────────────────────────────────────────────
+  static const Color primary      = Color(0xFF6366F1); // indigo-500
+  static const Color primaryDark  = Color(0xFF4F46E5); // indigo-600
+  static const Color primaryLight = Color(0xFFA5B4FC); // indigo-300
+  static const Color accentBg     = Color(0x1A6366F1); // indigo 10% alpha
 
   // ── Text ────────────────────────────────────────────────────────────────
-  static const Color textPrimary   = Color(0xFF0F172A); // Near-black
-  static const Color textSecondary = Color(0xFF64748B); // Slate grey
-  static const Color textMuted     = Color(0xFF94A3B8); // Light grey
+  static const Color textPrimary   = Color(0xFFF4F4F5); // zinc-100
+  static const Color textSecondary = Color(0xFFA1A1AA); // zinc-400
+  static const Color textMuted     = Color(0xFF52525B); // zinc-600
 
-  // ── Status colors ────────────────────────────────────────────────────────
-  static const Color success  = Color(0xFF10B981); // Emerald green
-  static const Color error    = Color(0xFFEF4444); // Red
-  static const Color warning  = Color(0xFFF59E0B); // Amber
-  static const Color info     = Color(0xFF3B82F6); // Blue
+  // ── Status ────────────────────────────────────────────────────────────────
+  static const Color success  = Color(0xFF22C55E); // green-500
+  static const Color error    = Color(0xFFEF4444); // red-500
+  static const Color warning  = Color(0xFFF59E0B); // amber-500
+  static const Color info     = Color(0xFF38BDF8); // sky-400
 
-  // ── Input fields ────────────────────────────────────────────────────────
-  static const Color inputBg     = Color(0xFFF8FAFC);
-  static const Color inputBorder = Color(0xFFCBD5E1);
+  // ── Inputs ──────────────────────────────────────────────────────────────
+  static const Color inputBg     = Color(0xFF1C1C1F);
+  static const Color inputBorder = Color(0xFF3F3F46);
   static const Color inputFocus  = Color(0xFF6366F1);
 
-  // ── Company badge palette (cycles through for visual variety) ────────────
+  // ── Company badge palette ─────────────────────────────────────────────────
   static const List<Color> badgeColors = [
-    Color(0xFF3B82F6), // Blue
-    Color(0xFF8B5CF6), // Violet
-    Color(0xFFEC4899), // Pink
-    Color(0xFFF59E0B), // Amber
-    Color(0xFF10B981), // Emerald
-    Color(0xFFEF4444), // Red
-    Color(0xFF6366F1), // Indigo
-    Color(0xFF14B8A6), // Teal
-    Color(0xFFE11D48), // Rose
-    Color(0xFF0EA5E9), // Sky
+    Color(0xFF6366F1), // indigo
+    Color(0xFF8B5CF6), // violet
+    Color(0xFFEC4899), // pink
+    Color(0xFFF59E0B), // amber
+    Color(0xFF22C55E), // green
+    Color(0xFFEF4444), // red
+    Color(0xFF38BDF8), // sky
+    Color(0xFF14B8A6), // teal
+    Color(0xFFF97316), // orange
+    Color(0xFFA855F7), // purple
   ];
-
-  // ── Category chip colors ─────────────────────────────────────────────────
-  static const Color chipBg       = Color(0xFFF1F5F9);
-  static const Color chipSelected = Color(0xFF0F172A);
 
   static Color badgeFor(String name) {
     if (name.isEmpty) return badgeColors[0];
     return badgeColors[name.codeUnitAt(0) % badgeColors.length];
   }
 
-  // ── Legacy aliases (used in admin/profile screens) ───────────────────────
-  static const Color gold      = accent;
-  static const Color goldLight = Color(0xFF818CF8); // indigo-400
+  // ── Legacy aliases (used across screens — map to new equivalents) ────────
+  static const Color gold      = primary;
+  static const Color goldLight = primaryLight;
   static const Color skyBlue   = info;
-  static const Color inputFocusLegacy = inputFocus;
-  static const Color cardBgDark = Color(0xFFF1F5F9); // light slate for tinted bg
+  static const Color accent    = primary;
+  static const Color accentLight = accentBg;
+  static const Color accentDark  = primaryDark;
+  static const Color chipBg    = Color(0xFF27272A);
 }

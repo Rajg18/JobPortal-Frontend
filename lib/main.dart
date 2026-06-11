@@ -10,18 +10,16 @@ import 'screens/admin/admin_shell.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Lock to portrait only for a clean mobile experience.
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Light status bar — dark icons on white background.
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor:            Colors.transparent,
-    statusBarIconBrightness:   Brightness.dark,
-    systemNavigationBarColor:  Color(0xFFFFFFFF),
-    systemNavigationBarIconBrightness: Brightness.dark,
+    statusBarColor:           Colors.transparent,
+    statusBarIconBrightness:  Brightness.light,
+    systemNavigationBarColor: Color(0xFF09090B),
+    systemNavigationBarIconBrightness: Brightness.light,
   ));
 
   runApp(
@@ -38,15 +36,14 @@ class JobPortalApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title:          'JobPortal',
+      title: 'HireLoop',
       debugShowCheckedModeBanner: false,
-      theme:          AppTheme.light,
-      home:           const _AuthGate(),
+      theme: AppTheme.dark,
+      home: const _AuthGate(),
     );
   }
 }
 
-/// Decides which screen to show based on auth state.
 class _AuthGate extends StatelessWidget {
   const _AuthGate();
 
@@ -54,14 +51,12 @@ class _AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
-    // While restoring session from shared prefs, show a branded splash.
     if (!auth.isLoggedIn && auth.token == null) {
       return FutureBuilder(
-        // Small delay so restoreSession() can complete before flicker.
-        future: Future.delayed(const Duration(milliseconds: 300)),
+        future: Future.delayed(const Duration(milliseconds: 400)),
         builder: (_, snap) {
           if (snap.connectionState != ConnectionState.done) {
-            return _SplashScreen();
+            return const _SplashScreen();
           }
           return auth.isLoggedIn
               ? (auth.role == 'ADMIN' ? const AdminShell() : const UserShell())
@@ -76,17 +71,23 @@ class _AuthGate extends StatelessWidget {
 }
 
 class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      backgroundColor: Color(0xFF09090B),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _AnimatedLogo(),
-            SizedBox(height: 24),
-            CircularProgressIndicator(
-              color: Color(0xFFF5A623), strokeWidth: 2),
+            _Logo(),
+            SizedBox(height: 32),
+            SizedBox(
+              width: 24, height: 24,
+              child: CircularProgressIndicator(
+                color: Color(0xFF6366F1), strokeWidth: 2),
+            ),
           ],
         ),
       ),
@@ -94,50 +95,50 @@ class _SplashScreen extends StatelessWidget {
   }
 }
 
-class _AnimatedLogo extends StatefulWidget {
-  const _AnimatedLogo();
-
+class _Logo extends StatefulWidget {
+  const _Logo();
   @override
-  State<_AnimatedLogo> createState() => _AnimatedLogoState();
+  State<_Logo> createState() => _LogoState();
 }
 
-class _AnimatedLogoState extends State<_AnimatedLogo>
-    with SingleTickerProviderStateMixin {
+class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-  late final Animation<double>   _scale;
+  late final Animation<double> _fade;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync:    this,
-      duration: const Duration(milliseconds: 800),
-    )..forward();
-    _scale = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack);
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600))
+      ..forward();
+    _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
   }
 
   @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
+  void dispose() { _ctrl.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scale,
-      child: Container(
-        width: 80, height: 80,
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
-          borderRadius: BorderRadius.circular(22),
-        ),
-        child: const Center(
-          child: Text('H',
-            style: TextStyle(
-              fontSize: 38, fontWeight: FontWeight.w800,
-              color: Colors.white)),
-        ),
+    return FadeTransition(
+      opacity: _fade,
+      child: Column(
+        children: [
+          Container(
+            width: 64, height: 64,
+            decoration: BoxDecoration(
+              color: const Color(0xFF6366F1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Center(
+              child: Text('H',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800,
+                    color: Colors.white)),
+            ),
+          ),
+          const SizedBox(height: 14),
+          const Text('HireLoop',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700,
+                color: Color(0xFFF4F4F5), letterSpacing: -0.3)),
+        ],
       ),
     );
   }

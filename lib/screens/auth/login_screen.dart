@@ -10,7 +10,6 @@ import '../admin/admin_shell.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -22,11 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool  _obscure   = true;
 
   @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passCtrl.dispose();
-    super.dispose();
-  }
+  void dispose() { _emailCtrl.dispose(); _passCtrl.dispose(); super.dispose(); }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -38,178 +33,205 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     if (ok) {
       Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (_) =>
-            auth.role == 'ADMIN' ? const AdminShell() : const UserShell(),
-      ));
+        builder: (_) => auth.role == 'ADMIN' ? const AdminShell() : const UserShell()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(auth.error ?? 'Login failed'),
-        backgroundColor: AppColors.error,
-      ));
+        backgroundColor: AppColors.error));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final size = MediaQuery.of(context).size;
+    final w    = MediaQuery.of(context).size.width;
+    final isWide = w > 900;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: size.width > 600 ? size.width * 0.2 : 24,
-              vertical: 32,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ── Logo ──────────────────────────────────────────────────
-                Container(
-                  width: 56, height: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Center(
-                    child: Text('H',
-                      style: TextStyle(
-                        fontSize: 26, fontWeight: FontWeight.w800,
-                        color: Colors.white)),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text('HireLoop',
-                  style: GoogleFonts.inter(
-                    fontSize: 24, fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary, letterSpacing: -0.5)),
-                const SizedBox(height: 4),
-                Text('Find work that moves you forward',
-                  style: GoogleFonts.inter(
-                    fontSize: 13, color: AppColors.textMuted)),
-
-                const SizedBox(height: 36),
-
-                // ── Card ─────────────────────────────────────────────────
-                Container(
-                  padding: const EdgeInsets.all(26),
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBg,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.divider),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
+      body: Row(
+        children: [
+          // ── Left panel (dark hero, only on wide screens) ─────────────────
+          if (isWide)
+            Expanded(
+              child: Container(
+                color: AppColors.surface,
+                padding: const EdgeInsets.all(48),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: Text('H',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800,
+                                color: Colors.white)),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Welcome back',
-                          style: GoogleFonts.inter(
-                            fontSize: 20, fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary)),
-                        const SizedBox(height: 2),
-                        Text('Sign in to your account',
-                          style: GoogleFonts.inter(
-                            fontSize: 13, color: AppColors.textMuted)),
-
-                        const SizedBox(height: 22),
-
-                        AppTextField(
-                          controller:   _emailCtrl,
-                          label:        'Email',
-                          hint:         'you@example.com',
-                          prefixIcon:   Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (v) =>
-                              (v == null || v.isEmpty) ? 'Email is required' : null,
-                        ),
-                        const SizedBox(height: 12),
-                        AppTextField(
-                          controller:  _passCtrl,
-                          label:       'Password',
-                          prefixIcon:  Icons.lock_outline,
-                          obscureText: _obscure,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscure
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: AppColors.textMuted, size: 18),
-                            onPressed: () =>
-                                setState(() => _obscure = !_obscure),
-                          ),
-                          validator: (v) =>
-                              (v == null || v.isEmpty) ? 'Password is required' : null,
-                        ),
-
-                        const SizedBox(height: 22),
-
-                        SizedBox(
-                          width: double.infinity, height: 50,
-                          child: ElevatedButton(
-                            onPressed: auth.loading ? null : _submit,
-                            child: auth.loading
-                                ? const SizedBox(
-                                    width: 20, height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2, color: Colors.white))
-                                : const Text('Sign In'),
-                          ),
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        Row(children: [
-                          const Expanded(child: Divider()),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text('or',
-                              style: GoogleFonts.inter(
-                                fontSize: 12, color: AppColors.textMuted)),
-                          ),
-                          const Expanded(child: Divider()),
-                        ]),
-
-                        const SizedBox(height: 14),
-
-                        Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text("Don't have an account? ",
-                                style: GoogleFonts.inter(
-                                  fontSize: 13, color: AppColors.textSecondary)),
-                              GestureDetector(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const RegisterScreen())),
-                                child: Text('Register',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.accent)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      const SizedBox(width: 8),
+                      Text('HireLoop',
+                        style: GoogleFonts.inter(
+                          fontSize: 18, fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary)),
+                    ]),
+                    const Spacer(),
+                    Text('Find work that\nmoves you forward.',
+                      style: GoogleFonts.inter(
+                        fontSize: 36, fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary, height: 1.2,
+                        letterSpacing: -0.8)),
+                    const SizedBox(height: 16),
+                    Text('Join 32k+ professionals who found their\nnext role through HireLoop.',
+                      style: GoogleFonts.inter(
+                        fontSize: 15, color: AppColors.textSecondary, height: 1.6)),
+                    const SizedBox(height: 40),
+                    ...[
+                      '✓  Senior roles only — no junior clutter',
+                      '✓  Companies that reply within 48h',
+                      '✓  Salary ranges shown upfront',
+                    ].map((s) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(s,
+                            style: GoogleFonts.inter(
+                              fontSize: 13, color: AppColors.textSecondary)),
+                        )),
+                    const Spacer(),
+                  ],
                 ),
-              ],
+              ),
+            ),
+
+          // ── Right panel (form) ────────────────────────────────────────────
+          SizedBox(
+            width: isWide ? 480 : w,
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!isWide) ...[
+                      Row(children: [
+                        Container(
+                          width: 32, height: 32,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Center(
+                            child: Text('H',
+                              style: TextStyle(fontSize: 16,
+                                  fontWeight: FontWeight.w800, color: Colors.white)),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('HireLoop',
+                          style: GoogleFonts.inter(
+                            fontSize: 18, fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary)),
+                      ]),
+                      const SizedBox(height: 32),
+                    ],
+                    Text('Welcome back',
+                      style: GoogleFonts.inter(
+                        fontSize: 24, fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary, letterSpacing: -0.4)),
+                    const SizedBox(height: 4),
+                    Text('Sign in to your account to continue',
+                      style: GoogleFonts.inter(
+                        fontSize: 13, color: AppColors.textSecondary)),
+                    const SizedBox(height: 32),
+
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          AppTextField(
+                            controller:   _emailCtrl,
+                            label:        'Email',
+                            hint:         'you@example.com',
+                            prefixIcon:   Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (v) =>
+                                (v == null || v.isEmpty) ? 'Email is required' : null,
+                          ),
+                          const SizedBox(height: 14),
+                          AppTextField(
+                            controller:  _passCtrl,
+                            label:       'Password',
+                            prefixIcon:  Icons.lock_outline,
+                            obscureText: _obscure,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscure
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: AppColors.textMuted, size: 18),
+                              onPressed: () => setState(() => _obscure = !_obscure),
+                            ),
+                            validator: (v) =>
+                                (v == null || v.isEmpty) ? 'Password is required' : null,
+                          ),
+                          const SizedBox(height: 22),
+                          SizedBox(
+                            width: double.infinity, height: 46,
+                            child: ElevatedButton(
+                              onPressed: auth.loading ? null : _submit,
+                              child: auth.loading
+                                  ? const SizedBox(
+                                      width: 18, height: 18,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2, color: Colors.white))
+                                  : const Text('Sign In'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+                    Row(children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text('or',
+                          style: GoogleFonts.inter(
+                            fontSize: 12, color: AppColors.textMuted)),
+                      ),
+                      const Expanded(child: Divider()),
+                    ]),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("Don't have an account?  ",
+                            style: GoogleFonts.inter(
+                              fontSize: 13, color: AppColors.textSecondary)),
+                          GestureDetector(
+                            onTap: () => Navigator.push(context,
+                              MaterialPageRoute(
+                                  builder: (_) => const RegisterScreen())),
+                            child: Text('Create account',
+                              style: GoogleFonts.inter(
+                                fontSize: 13, fontWeight: FontWeight.w600,
+                                color: AppColors.primary)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

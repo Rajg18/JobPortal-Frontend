@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -24,7 +24,7 @@ class _JobsManagementScreenState extends State<JobsManagementScreen> {
     });
   }
 
-  // ── Navigate to Create Job — pass JobProvider into the new route ─────────
+  // â”€â”€ Navigate to Create Job â€” pass JobProvider into the new route â”€â”€â”€â”€â”€â”€â”€â”€â”€
   void _openCreateJob() {
     final jobProvider = context.read<JobProvider>();
     Navigator.push(
@@ -38,7 +38,7 @@ class _JobsManagementScreenState extends State<JobsManagementScreen> {
     );
   }
 
-  // ── Navigate to Applicants — pass both providers into the new route ──────
+  // â”€â”€ Navigate to Applicants â€” pass both providers into the new route â”€â”€â”€â”€â”€â”€
   void _openApplicants(job) {
     final jobProvider = context.read<JobProvider>();
     final appProvider = context.read<ApplicationProvider>();
@@ -63,11 +63,11 @@ class _JobsManagementScreenState extends State<JobsManagementScreen> {
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Delete Job?',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
         content: Text(
           'Are you sure you want to delete "$title"? This cannot be undone.',
-          style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textSecondary)),
+          style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -80,7 +80,7 @@ class _JobsManagementScreenState extends State<JobsManagementScreen> {
               minimumSize: const Size(80, 40),
             ),
             child: Text('Delete',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.inter(
                 color: Colors.white, fontWeight: FontWeight.w600)),
           ),
         ],
@@ -118,12 +118,12 @@ class _JobsManagementScreenState extends State<JobsManagementScreen> {
         ],
       ),
 
-      // ── Post Job FAB ───────────────────────────────────────────────────────
+      // â”€â”€ Post Job FAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openCreateJob,
         icon:  const Icon(Icons.add, size: 20),
         label: Text('Post Job',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13)),
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13)),
       ),
 
       body: jobs.loading && jobs.jobs.isEmpty
@@ -140,7 +140,7 @@ class _JobsManagementScreenState extends State<JobsManagementScreen> {
                       final job = jobs.jobs[i];
                       return Column(
                         children: [
-                          // Job card (tap → applicants, delete icon → confirm delete)
+                          // Job card (tap â†’ applicants, delete icon â†’ confirm delete)
                           JobCard(
                             job:      job,
                             onTap:    () => _openApplicants(job),
@@ -166,7 +166,7 @@ class _JobsManagementScreenState extends State<JobsManagementScreen> {
                                     size: 16, color: AppColors.skyBlue),
                                   const SizedBox(width: 8),
                                   Text('View Applicants',
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.inter(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.skyBlue)),
@@ -190,12 +190,12 @@ class _JobsManagementScreenState extends State<JobsManagementScreen> {
           const Icon(Icons.work_off_outlined, size: 64, color: AppColors.textMuted),
           const SizedBox(height: 16),
           Text('No jobs posted yet',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 16, fontWeight: FontWeight.w600,
               color: AppColors.textSecondary)),
           const SizedBox(height: 6),
           Text('Tap the button below to post your first job',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 13, color: AppColors.textMuted)),
           const SizedBox(height: 24),
           ElevatedButton.icon(

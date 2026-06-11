@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -58,17 +58,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Container(
         width:  double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin:  Alignment.topLeft,
-            end:    Alignment.bottomRight,
-            colors: [Color(0xFF060F1E), Color(0xFF0A1628), Color(0xFF0D1F3A)],
-            stops:  [0.0, 0.5, 1.0],
-          ),
-        ),
+        color: AppColors.background,
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -79,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ── Back + Title ─────────────────────────────────────────
+                  // â”€â”€ Back + Title â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                   Row(
                     children: [
                       GestureDetector(
@@ -97,7 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(width: 14),
                       Text('Create Account',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary)),
@@ -106,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   const SizedBox(height: 28),
 
-                  // ── Card ─────────────────────────────────────────────────
+                  // â”€â”€ Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                   Container(
                     padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
@@ -129,12 +123,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text('Join JobPortal',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                               fontSize: 20, fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary)),
                           const SizedBox(height: 2),
                           Text('Fill in your details to get started',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                               fontSize: 12, color: AppColors.textMuted)),
 
                           const SizedBox(height: 24),
@@ -181,9 +175,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                           const SizedBox(height: 20),
 
-                          // ── Role selector ─────────────────────────────────
+                          // â”€â”€ Role selector â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                           Text('I am a...',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary)),
@@ -222,13 +216,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text('Already have an account? ',
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.inter(
                                     fontSize: 13,
                                     color: AppColors.textSecondary)),
                                 GestureDetector(
                                   onTap: () => Navigator.pop(context),
                                   child: Text('Sign In',
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.inter(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.gold)),
@@ -274,7 +268,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 size: 24),
               const SizedBox(height: 6),
               Text(label,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: selected ? AppColors.gold : AppColors.textSecondary)),

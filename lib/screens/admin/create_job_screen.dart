@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -75,11 +75,11 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Job Details',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               const SizedBox(height: 4),
               Text('Fill in the details for your job posting',
-                style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary)),
 
               const SizedBox(height: 24),
 

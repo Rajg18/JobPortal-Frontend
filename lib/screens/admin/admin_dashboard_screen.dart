@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -78,15 +78,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
 
-                        // ── Welcome banner ───────────────────────────────────
+                        // â”€â”€ Welcome banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _welcomeBanner(initials, name, email),
                         const SizedBox(height: 24),
 
-                        // ── Section label ────────────────────────────────────
+                        // â”€â”€ Section label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _sectionLabel('My Recruitment Overview'),
                         const SizedBox(height: 12),
 
-                        // ── 4 stat cards in a 2×2 grid ──────────────────────
+                        // â”€â”€ 4 stat cards in a 2Ã—2 grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         Row(children: [
                           Expanded(child: _statCard(
                             'Jobs Posted',  '${_stats!.myJobs}',
@@ -113,28 +113,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                         const SizedBox(height: 24),
 
-                        // ── Application funnel ───────────────────────────────
+                        // â”€â”€ Application funnel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _sectionLabel('Application Funnel'),
                         const SizedBox(height: 12),
                         _funnelCard(),
 
                         const SizedBox(height: 24),
 
-                        // ── Status breakdown bars ────────────────────────────
+                        // â”€â”€ Status breakdown bars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _sectionLabel('Status Breakdown'),
                         const SizedBox(height: 12),
                         _statusBreakdownCard(),
 
                         const SizedBox(height: 24),
 
-                        // ── Platform context row ─────────────────────────────
+                        // â”€â”€ Platform context row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _sectionLabel('Platform'),
                         const SizedBox(height: 12),
                         _platformCard(),
 
                         const SizedBox(height: 24),
 
-                        // ── Quick tips ───────────────────────────────────────
+                        // â”€â”€ Quick tips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _sectionLabel('Recruiter Tips'),
                         const SizedBox(height: 12),
                         _tipCard(
@@ -161,7 +161,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  // ── Welcome banner ─────────────────────────────────────────────────────────
+  // â”€â”€ Welcome banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _welcomeBanner(String initials, String name, String email) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -193,7 +193,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             child: Center(
               child: Text(initials,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 22, fontWeight: FontWeight.w800,
                   color: AppColors.background)),
             ),
@@ -204,13 +204,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Good to see you, $name!',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 15, fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary),
                   overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
                 Text(email,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 11, color: AppColors.textMuted),
                   overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 6),
@@ -237,11 +237,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       border:       Border.all(color: color.withValues(alpha: 0.3)),
     ),
     child: Text(text,
-      style: GoogleFonts.poppins(
+      style: GoogleFonts.inter(
         fontSize: 9, fontWeight: FontWeight.w700, color: color)),
   );
 
-  // ── Stat card ──────────────────────────────────────────────────────────────
+  // â”€â”€ Stat card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _statCard(String label, String value, IconData icon, Color color,
       {String subtitle = ''}) {
     return Container(
@@ -272,19 +272,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(subtitle,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 9, color: color, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(value,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 26, fontWeight: FontWeight.w800,
               color: AppColors.textPrimary, height: 1)),
           const SizedBox(height: 4),
           Text(label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 12, color: AppColors.textSecondary,
               fontWeight: FontWeight.w500)),
         ],
@@ -292,7 +292,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  // ── Application funnel ─────────────────────────────────────────────────────
+  // â”€â”€ Application funnel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _funnelCard() {
     final total    = _stats!.myApplications;
     final accepted = _stats!.acceptedApplications;
@@ -324,13 +324,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final pct   = total > 0 ? count / total : 0.0;
     final pctStr = total > 0
         ? '${(pct * 100).toStringAsFixed(0)}%'
-        : '—';
+        : 'â€”';
     return Row(
       children: [
         SizedBox(
           width: 130,
           child: Text(label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 12, color: AppColors.textSecondary)),
         ),
         Expanded(
@@ -349,14 +349,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           width: 36,
           child: Text(pctStr,
             textAlign: TextAlign.right,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 11, fontWeight: FontWeight.w700, color: color)),
         ),
       ],
     );
   }
 
-  // ── Status breakdown card (3 columns) ─────────────────────────────────────
+  // â”€â”€ Status breakdown card (3 columns) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _statusBreakdownCard() {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -392,15 +392,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Column(
       children: [
         Text('$count',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 22, fontWeight: FontWeight.w800, color: color)),
         Text('$pct%',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 11, fontWeight: FontWeight.w600,
             color: color.withValues(alpha: 0.7))),
         const SizedBox(height: 4),
         Text(label,
-          style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textSecondary)),
+          style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(3),
@@ -415,7 +415,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  // ── Platform context card ──────────────────────────────────────────────────
+  // â”€â”€ Platform context card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _platformCard() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
@@ -440,11 +440,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('${_stats!.totalUsers} registered job seekers',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 14, fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary)),
               Text('active on the platform',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 12, color: AppColors.textMuted)),
             ],
           ),
@@ -453,7 +453,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  // ── Tip card ──────────────────────────────────────────────────────────────
+  // â”€â”€ Tip card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _tipCard(IconData icon, Color color, String title, String body) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -472,11 +472,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 13, fontWeight: FontWeight.w700, color: color)),
                 const SizedBox(height: 3),
                 Text(body,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 12, color: AppColors.textSecondary, height: 1.5)),
               ],
             ),
@@ -486,13 +486,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  // ── Section label ─────────────────────────────────────────────────────────
+  // â”€â”€ Section label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _sectionLabel(String label) => Text(label,
-    style: GoogleFonts.poppins(
+    style: GoogleFonts.inter(
       fontSize: 13, fontWeight: FontWeight.w700,
       color: AppColors.textSecondary, letterSpacing: 0.5));
 
-  // ── Error view ────────────────────────────────────────────────────────────
+  // â”€â”€ Error view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _errorView() => Center(
     child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -500,7 +500,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         const Icon(Icons.error_outline, size: 56, color: AppColors.error),
         const SizedBox(height: 12),
         Text('Failed to load stats',
-          style: GoogleFonts.poppins(fontSize: 15, color: AppColors.textSecondary)),
+          style: GoogleFonts.inter(fontSize: 15, color: AppColors.textSecondary)),
         const SizedBox(height: 16),
         ElevatedButton(onPressed: _load, child: const Text('Retry')),
       ],

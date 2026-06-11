@@ -9,10 +9,10 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (color, bg, label) = switch (status.toUpperCase()) {
-      'ACCEPTED' => (AppColors.success, const Color(0xFFD1FAE5), 'Accepted'),
-      'REJECTED' => (AppColors.error,   const Color(0xFFFEE2E2), 'Rejected'),
-      'APPLIED'  => (AppColors.info,    const Color(0xFFDBEAFE), 'Applied'),
-      _          => (AppColors.warning,  const Color(0xFFFEF3C7), 'Pending'),
+      'ACCEPTED' => (AppColors.success, AppColors.success.withValues(alpha: 0.12), 'Accepted'),
+      'REJECTED' => (AppColors.error,   AppColors.error.withValues(alpha: 0.12),   'Rejected'),
+      'APPLIED'  => (AppColors.info,    AppColors.info.withValues(alpha: 0.12),    'Applied'),
+      _          => (AppColors.warning,  AppColors.warning.withValues(alpha: 0.12), 'Pending'),
     };
 
     return Container(

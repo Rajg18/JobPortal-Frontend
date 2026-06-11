@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -70,7 +70,7 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
                                   app.companyName.isNotEmpty
                                       ? app.companyName[0].toUpperCase()
                                       : '?',
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.inter(
                                     fontSize: 16, fontWeight: FontWeight.w700,
                                     color: AppColors.skyBlue),
                                 ),
@@ -82,17 +82,17 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(app.jobTitle,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.inter(
                                       fontSize: 14, fontWeight: FontWeight.w600,
                                       color: AppColors.textPrimary),
                                     maxLines: 1, overflow: TextOverflow.ellipsis),
                                   const SizedBox(height: 2),
                                   Text(app.companyName,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.inter(
                                       fontSize: 12, color: AppColors.textSecondary)),
                                   const SizedBox(height: 6),
                                   Text(_formatDate(app.appliedAt),
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.inter(
                                       fontSize: 10, color: AppColors.textMuted)),
                                 ],
                               ),
@@ -124,11 +124,11 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
           const Icon(Icons.inbox_outlined, size: 64, color: AppColors.textMuted),
           const SizedBox(height: 16),
           Text('No applications yet',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
           const SizedBox(height: 6),
           Text('Browse jobs and start applying!',
-            style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textMuted)),
+            style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted)),
         ],
       ),
     );

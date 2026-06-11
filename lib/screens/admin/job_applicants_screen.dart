@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -37,7 +37,7 @@ class _JobApplicantsScreenState extends State<JobApplicantsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Update Application Status',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.inter(
                 fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
             const SizedBox(height: 16),
             ...statuses.map((s) {
@@ -61,7 +61,7 @@ class _JobApplicantsScreenState extends State<JobApplicantsScreen> {
                       Icon(_statusIcon(s), color: color, size: 18),
                       const SizedBox(width: 12),
                       Text(s,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 14, fontWeight: FontWeight.w600, color: color)),
                       const Spacer(),
                       if (isActive) Icon(Icons.check_circle, color: color, size: 18),
@@ -106,7 +106,7 @@ class _JobApplicantsScreenState extends State<JobApplicantsScreen> {
       ),
       body: Column(
         children: [
-          // ── Job header bar ───────────────────────────────────────────────
+          // â”€â”€ Job header bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             color: AppColors.surface,
@@ -115,10 +115,10 @@ class _JobApplicantsScreenState extends State<JobApplicantsScreen> {
                 const Icon(Icons.business_outlined, size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 6),
                 Text(widget.job.companyName,
-                  style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary)),
+                  style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
                 const Spacer(),
                 Text('${apps.jobApplicants.length} applicants',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.gold)),
               ],
             ),
@@ -135,7 +135,7 @@ class _JobApplicantsScreenState extends State<JobApplicantsScreen> {
                             const Icon(Icons.people_outline, size: 56, color: AppColors.textMuted),
                             const SizedBox(height: 12),
                             Text('No applicants yet',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.inter(
                                 fontSize: 15, color: AppColors.textSecondary)),
                           ],
                         ),
@@ -163,7 +163,7 @@ class _JobApplicantsScreenState extends State<JobApplicantsScreen> {
                                   ),
                                   child: Center(
                                     child: Text('${i + 1}',
-                                      style: GoogleFonts.poppins(
+                                      style: GoogleFonts.inter(
                                         fontSize: 14, fontWeight: FontWeight.w700,
                                         color: AppColors.skyBlue)),
                                   ),
@@ -174,12 +174,12 @@ class _JobApplicantsScreenState extends State<JobApplicantsScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text('Application #${app.id}',
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.inter(
                                           fontSize: 13, fontWeight: FontWeight.w600,
                                           color: AppColors.textPrimary)),
                                       const SizedBox(height: 2),
                                       Text(_formatDate(app.appliedAt),
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.inter(
                                           fontSize: 11, color: AppColors.textMuted)),
                                     ],
                                   ),

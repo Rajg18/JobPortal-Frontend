@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -103,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // ── Avatar card ──────────────────────────────────────────
+                  // â”€â”€ Avatar card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                   Center(
                     child: Column(
                       children: [
@@ -120,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Center(
                             child: Text(
                               (auth.email ?? 'U')[0].toUpperCase(),
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.inter(
                                 fontSize: 32, fontWeight: FontWeight.w800,
                                 color: AppColors.background),
                             ),
@@ -128,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(auth.email ?? '',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.inter(
                             fontSize: 14, fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary)),
                         const SizedBox(height: 4),
@@ -139,7 +139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text('Job Seeker',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                               fontSize: 11, fontWeight: FontWeight.w600,
                               color: AppColors.skyBlue)),
                         ),
@@ -167,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const Icon(Icons.person_add_alt_outlined, size: 56, color: AppColors.textMuted),
           const SizedBox(height: 12),
           Text('Profile not set up yet',
-            style: GoogleFonts.poppins(fontSize: 15, color: AppColors.textSecondary)),
+            style: GoogleFonts.inter(fontSize: 15, color: AppColors.textSecondary)),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () => setState(() => _editing = true),
@@ -211,9 +211,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textMuted)),
+                style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted)),
               Text(value,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
             ],
           ),
