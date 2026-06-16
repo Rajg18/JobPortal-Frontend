@@ -1,50 +1,57 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../../core/constants/api_constants.dart';
+import '../../core/errors/session_expired_exception.dart';
+import '../../core/utils/api_client.dart';
 import '../models/application_model.dart';
 
 class ApplicationService {
-  final Map<String, String> _h;
-  ApplicationService(String token)
-      : _h = {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'};
+  final ApiClient _client;
+  ApplicationService(String token) : _client = ApiClient(token);
 
   Future<String> applyJob(int jobId) => _wrap(() async {
-    final res = await http.post(Uri.parse('${ApiConstants.applyJob}/$jobId'), headers: _h)
-        .timeout(const Duration(seconds: 60),
-            onTimeout: () => throw Exception('Timed out applying — please try again.'));
+    final res = await _client.post(
+      Uri.parse('${ApiConstants.applyJob}/$jobId'),
+      timeout: const Duration(seconds: 60),
+    );
     if (res.statusCode == 200) return res.body;
     throw Exception(_extractError(res));
   });
 
   Future<List<ApplicationModel>> getMyApplications() => _wrap(() async {
-    final res = await http.get(Uri.parse(ApiConstants.myApplications), headers: _h)
-        .timeout(const Duration(seconds: 60),
-            onTimeout: () => throw Exception('Timed out loading applications.'));
+    final res = await _client.get(
+      Uri.parse(ApiConstants.myApplications),
+      timeout: const Duration(seconds: 60),
+    );
     if (res.statusCode == 200) {
       final list = jsonDecode(res.body) as List<dynamic>;
-      return list.map((e) => ApplicationModel.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => ApplicationModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw Exception('Failed to load applications');
   });
 
-  Future<List<ApplicationModel>> getApplicantsForJob(int jobId) => _wrap(() async {
-    final res = await http.get(Uri.parse('${ApiConstants.adminApplicants}/$jobId'), headers: _h)
-        .timeout(const Duration(seconds: 60),
-            onTimeout: () => throw Exception('Timed out loading applicants.'));
+  Future<List<ApplicationModel>> getApplicantsForJob(int jobId) =>
+      _wrap(() async {
+    final res = await _client.get(
+      Uri.parse('${ApiConstants.adminApplicants}/$jobId'),
+      timeout: const Duration(seconds: 60),
+    );
     if (res.statusCode == 200) {
       final list = jsonDecode(res.body) as List<dynamic>;
-      return list.map((e) => ApplicationModel.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => ApplicationModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw Exception('Failed to load applicants');
   });
 
   Future<String> updateStatus(int appId, String status) => _wrap(() async {
-    final res = await http.put(
+    final res = await _client.put(
       Uri.parse('${ApiConstants.adminUpdateApp}/$appId'),
-      headers: _h,
       body: jsonEncode({'status': status}),
-    ).timeout(const Duration(seconds: 60),
-        onTimeout: () => throw Exception('Timed out updating status.'));
+      timeout: const Duration(seconds: 60),
+    );
     if (res.statusCode == 200) return res.body;
     throw Exception(_extractError(res));
   });
@@ -52,18 +59,22 @@ class ApplicationService {
   Future<T> _wrap<T>(Future<T> Function() fn) async {
     try {
       return await fn();
+    } on SessionExpiredException {
+      rethrow;
     } catch (e) {
       if (e is Exception) rethrow;
       throw Exception('Unexpected error: $e');
     }
   }
 
-  String _extractError(http.Response res) {
+  String _extractError(dynamic res) {
     try {
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
-      return body['message'] as String? ?? res.body;
+      final body = jsonDecode(res.body as String) as Map<String, dynamic>;
+      return body['message'] as String? ?? res.body as String;
     } catch (_) {
-      return res.body.isNotEmpty ? res.body : 'Request failed (${res.statusCode})';
+      return (res.body as String).isNotEmpty
+          ? res.body as String
+          : 'Request failed (${res.statusCode})';
     }
   }
 }

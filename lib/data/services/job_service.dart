@@ -1,12 +1,12 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../../core/constants/api_constants.dart';
+import '../../core/errors/session_expired_exception.dart';
+import '../../core/utils/api_client.dart';
 import '../models/job_model.dart';
 
 class JobService {
-  final Map<String, String> _h;
-  JobService(String token)
-      : _h = {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'};
+  final ApiClient _client;
+  JobService(String token) : _client = ApiClient(token);
 
   Future<List<JobModel>> searchJobs({
     String? location,
@@ -26,31 +26,36 @@ class JobService {
 
     final uri = Uri.parse(ApiConstants.jobs).replace(queryParameters: params);
     return _wrap(() async {
-      final res = await http.get(uri, headers: _h)
-          .timeout(const Duration(seconds: 60),
-              onTimeout: () => throw Exception('Request timed out — server may be waking up, try again.'));
+      final res = await _client.get(uri,
+          timeout: const Duration(seconds: 60));
       if (res.statusCode == 200) {
         final data    = jsonDecode(res.body) as Map<String, dynamic>;
         final content = data['content'] as List<dynamic>;
-        return content.map((e) => JobModel.fromJson(e as Map<String, dynamic>)).toList();
+        return content
+            .map((e) => JobModel.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       throw Exception('Failed to load jobs (${res.statusCode})');
     });
   }
 
   Future<JobModel> getJob(int id) => _wrap(() async {
-    final res = await http.get(Uri.parse('${ApiConstants.jobs}/$id'), headers: _h)
-        .timeout(const Duration(seconds: 60),
-            onTimeout: () => throw Exception('Timed out loading job.'));
-    if (res.statusCode == 200) return JobModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    final res = await _client.get(
+      Uri.parse('${ApiConstants.jobs}/$id'),
+      timeout: const Duration(seconds: 60),
+    );
+    if (res.statusCode == 200) {
+      return JobModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    }
     throw Exception('Job not found');
   });
 
   Future<JobModel> createJob(JobModel job) => _wrap(() async {
-    final res = await http.post(Uri.parse(ApiConstants.adminJobs),
-        headers: _h, body: jsonEncode(job.toJson()))
-        .timeout(const Duration(seconds: 60),
-            onTimeout: () => throw Exception('Timed out creating job.'));
+    final res = await _client.post(
+      Uri.parse(ApiConstants.adminJobs),
+      body: jsonEncode(job.toJson()),
+      timeout: const Duration(seconds: 60),
+    );
     if (res.statusCode == 200 || res.statusCode == 201) {
       return JobModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
     }
@@ -58,15 +63,18 @@ class JobService {
   });
 
   Future<void> deleteJob(int id) => _wrap(() async {
-    final res = await http.delete(Uri.parse('${ApiConstants.adminJobs}/$id'), headers: _h)
-        .timeout(const Duration(seconds: 60),
-            onTimeout: () => throw Exception('Timed out deleting job.'));
+    final res = await _client.delete(
+      Uri.parse('${ApiConstants.adminJobs}/$id'),
+      timeout: const Duration(seconds: 60),
+    );
     if (res.statusCode != 200) throw Exception('Failed to delete job');
   });
 
   Future<T> _wrap<T>(Future<T> Function() fn) async {
     try {
       return await fn();
+    } on SessionExpiredException {
+      rethrow;
     } catch (e) {
       if (e is Exception) rethrow;
       throw Exception('Unexpected error: $e');
