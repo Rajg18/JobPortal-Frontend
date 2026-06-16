@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,7 @@ import '../../widgets/app_text_field.dart';
 import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final VoidCallback? onBack; // navigates back to the Jobs tab
+  final VoidCallback? onBack;
   const ProfileScreen({super.key, this.onBack});
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -56,9 +57,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
             content: Text('Profile saved successfully!'),
             backgroundColor: AppColors.success)
         : SnackBar(
-            content: Text(
-                context.read<ProfileProvider>().error ?? 'Save failed'),
+            content: Text(context.read<ProfileProvider>().error ?? 'Save failed'),
             backgroundColor: AppColors.error));
+  }
+
+  Future<void> _pickAndUploadResume() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.first;
+    if (file.bytes == null) return;
+
+    final prov = context.read<ProfileProvider>();
+    final ok   = await prov.uploadResume(file.bytes!, file.name);
+    if (!mounted) return;
+
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+          'Resume uploaded! AI is parsing your skills in the background — '
+          'check back in a few seconds.'),
+        backgroundColor: AppColors.success,
+        duration: Duration(seconds: 5),
+      ));
+      // Start background polling so parsedSkills updates automatically
+      prov.pollUntilParsed();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(prov.error ?? 'Upload failed'),
+        backgroundColor: AppColors.error,
+      ));
+    }
   }
 
   Future<void> _logout() async {
@@ -71,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _skillsCtrl.dispose(); _locationCtrl.dispose();
-    _phoneCtrl.dispose(); _expCtrl.dispose();
+    _phoneCtrl.dispose();  _expCtrl.dispose();
     super.dispose();
   }
 
@@ -90,12 +122,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: profile.loading
+      body: profile.loading && profile.profile == null
           ? const Center(child: CircularProgressIndicator(
               color: AppColors.primary, strokeWidth: 2))
           : CustomScrollView(slivers: [
-
-              // ── App bar ────────────────────────────────────────────────────
               SliverAppBar(
                 pinned: true,
                 backgroundColor: AppColors.surface,
@@ -107,10 +137,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: Padding(
                   padding: pad,
                   child: Row(children: [
-                    // Back to Jobs
                     if (widget.onBack != null) ...[
-                      _iconBtn(Icons.arrow_back_rounded, 'Back to Jobs',
-                          widget.onBack!),
+                      _iconBtn(Icons.arrow_back_rounded, 'Back', widget.onBack!),
                       const SizedBox(width: 8),
                     ],
                     Text('My Profile',
@@ -134,24 +162,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: pad.add(const EdgeInsets.symmetric(vertical: 32)),
+                  padding: pad.add(const EdgeInsets.symmetric(vertical: 28)),
                   child: isWide
                       ? Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Left — avatar card
                             SizedBox(
                               width: 260,
-                              child: _avatarCard(initials, username, email)),
+                              child: Column(children: [
+                                _avatarCard(initials, username, email),
+                                const SizedBox(height: 16),
+                                _resumeCard(profile),
+                              ]),
+                            ),
                             const SizedBox(width: 24),
-                            // Right — info / edit
-                            Expanded(child: _contentCard(profile, username)),
+                            Expanded(child: Column(children: [
+                              _contentCard(profile, username),
+                              const SizedBox(height: 16),
+                              _aiSkillsCard(profile),
+                            ])),
                           ],
                         )
                       : Column(children: [
                           _avatarCard(initials, username, email),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                           _contentCard(profile, username),
+                          const SizedBox(height: 16),
+                          _resumeCard(profile),
+                          const SizedBox(height: 16),
+                          _aiSkillsCard(profile),
+                          const SizedBox(height: 40),
                         ]),
                 ),
               ),
@@ -159,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Avatar card ─────────────────────────────────────────────────────────────
+  // ── Avatar card ──────────────────────────────────────────────────────────────
   Widget _avatarCard(String initials, String username, String email) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -169,23 +209,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         border: Border.all(color: AppColors.divider),
       ),
       child: Column(children: [
-        // Avatar circle
         Container(
           width: 80, height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [AppColors.primary, AppColors.primaryDark],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: Alignment.topLeft, end: Alignment.bottomRight,
             ),
           ),
-          child: Center(
-            child: Text(initials,
-              style: GoogleFonts.inter(
-                fontSize: 32, fontWeight: FontWeight.w800,
-                color: const Color(0xFF0D0F12))),
-          ),
+          child: Center(child: Text(initials,
+            style: GoogleFonts.inter(
+              fontSize: 32, fontWeight: FontWeight.w800,
+              color: const Color(0xFF0D0F12)))),
         ),
         const SizedBox(height: 14),
         Text(username,
@@ -213,7 +249,159 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Content card (view or edit) ─────────────────────────────────────────────
+  // ── Resume upload card ───────────────────────────────────────────────────────
+  Widget _resumeCard(ProfileProvider profile) {
+    final uploaded  = profile.profile?.resumeUploaded ?? false;
+    final parsed    = profile.profile?.parsedSkills != null &&
+                      profile.profile!.parsedSkills!.isNotEmpty;
+    final uploading = profile.uploading;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.description_outlined,
+                size: 16, color: AppColors.textMuted),
+            const SizedBox(width: 8),
+            Text('Resume',
+              style: GoogleFonts.inter(
+                fontSize: 14, fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary)),
+          ]),
+          const SizedBox(height: 6),
+          Text(
+            'Upload your PDF resume. HireLoop\'s AI will extract your skills '
+            'and tech stack to match you with the right jobs.',
+            style: GoogleFonts.inter(
+              fontSize: 12, color: AppColors.textMuted, height: 1.5)),
+          const SizedBox(height: 16),
+
+          // Status indicator
+          if (parsed)
+            _statusRow(Icons.check_circle_outline_rounded,
+                'Resume parsed — AI matching ready', AppColors.success)
+          else if (uploaded)
+            _statusRow(Icons.hourglass_bottom_rounded,
+                'Uploaded — AI parsing in progress…', AppColors.warning)
+          else
+            _statusRow(Icons.upload_file_outlined,
+                'No resume uploaded yet', AppColors.textMuted),
+
+          const SizedBox(height: 14),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: uploading ? null : _pickAndUploadResume,
+              icon: uploading
+                  ? const SizedBox(
+                      width: 16, height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.upload_rounded, size: 16),
+              label: Text(
+                uploading
+                    ? 'Uploading…'
+                    : uploaded ? 'Replace Resume (PDF)' : 'Upload Resume (PDF)',
+                style: GoogleFonts.inter(
+                  fontSize: 13, fontWeight: FontWeight.w600)),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statusRow(IconData icon, String text, Color color) => Row(
+    children: [
+      Icon(icon, size: 14, color: color),
+      const SizedBox(width: 7),
+      Expanded(child: Text(text,
+        style: GoogleFonts.inter(
+          fontSize: 12, color: color, fontWeight: FontWeight.w500))),
+    ],
+  );
+
+  // ── AI parsed skills card ────────────────────────────────────────────────────
+  Widget _aiSkillsCard(ProfileProvider profile) {
+    final p = profile.profile;
+    if (p == null) return const SizedBox.shrink();
+    final techList   = p.parsedTechStackList;
+    final skillsList = p.parsedSkillsList;
+    if (techList.isEmpty && skillsList.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.auto_awesome_rounded,
+                size: 16, color: Color(0xFF8B5CF6)),
+            const SizedBox(width: 8),
+            Text('AI-Extracted from Your Resume',
+              style: GoogleFonts.inter(
+                fontSize: 14, fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary)),
+          ]),
+          const SizedBox(height: 4),
+          Text(
+            'These were automatically detected by HireLoop\'s AI. '
+            'They power your job matches and cold emails.',
+            style: GoogleFonts.inter(
+              fontSize: 12, color: AppColors.textMuted, height: 1.4)),
+
+          if (techList.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _chipSection('Tech Stack', techList, AppColors.primary),
+          ],
+          if (skillsList.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            _chipSection('Soft Skills', skillsList, AppColors.info),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _chipSection(String label, List<String> items, Color color) =>
+    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label,
+        style: GoogleFonts.inter(
+          fontSize: 11, fontWeight: FontWeight.w600,
+          color: AppColors.textMuted, letterSpacing: 0.6)),
+      const SizedBox(height: 8),
+      Wrap(
+        spacing: 6, runSpacing: 6,
+        children: items.map((s) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: Text(s,
+            style: GoogleFonts.inter(
+              fontSize: 12, fontWeight: FontWeight.w500, color: color)),
+        )).toList(),
+      ),
+    ]);
+
+  // ── Content card (view / edit) ───────────────────────────────────────────────
   Widget _contentCard(ProfileProvider profile, String username) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -222,98 +410,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.divider),
       ),
-      child: _editing
-          ? _editForm(profile)
-          : _viewMode(profile, username),
+      child: _editing ? _editForm(profile) : _viewMode(profile),
     );
   }
 
-  Widget _viewMode(ProfileProvider profile, String username) {
+  Widget _viewMode(ProfileProvider profile) {
     final p = profile.profile;
     if (p == null) {
-      return Column(
-        children: [
-          const SizedBox(height: 20),
-          Container(
-            width: 56, height: 56,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.divider),
-            ),
-            child: const Icon(Icons.person_add_alt_outlined,
-                size: 26, color: AppColors.textMuted),
+      return Column(children: [
+        const SizedBox(height: 20),
+        Container(
+          width: 56, height: 56,
+          decoration: BoxDecoration(
+            color: AppColors.surface, shape: BoxShape.circle,
+            border: Border.all(color: AppColors.divider),
           ),
-          const SizedBox(height: 14),
-          Text('Profile not set up yet',
-            style: GoogleFonts.inter(
-              fontSize: 15, fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary)),
-          const SizedBox(height: 6),
-          Text('Add your skills and experience to get matched with roles',
-            style: GoogleFonts.inter(
-              fontSize: 13, color: AppColors.textMuted),
-            textAlign: TextAlign.center),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: 180,
-            child: ElevatedButton.icon(
-              onPressed: () => setState(() => _editing = true),
-              icon: const Icon(Icons.add_rounded, size: 16),
-              label: const Text('Set up profile'),
-            ),
+          child: const Icon(Icons.person_add_alt_outlined,
+              size: 26, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: 14),
+        Text('Profile not set up yet',
+          style: GoogleFonts.inter(
+            fontSize: 15, fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary)),
+        const SizedBox(height: 6),
+        Text(
+          'Fill in your professional details so recruiters and '
+          'HireLoop\'s AI can match you with the right jobs.',
+          style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted),
+          textAlign: TextAlign.center),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: 180,
+          child: ElevatedButton.icon(
+            onPressed: () => setState(() => _editing = true),
+            icon: const Icon(Icons.add_rounded, size: 16),
+            label: const Text('Set up profile'),
           ),
-          const SizedBox(height: 20),
-        ],
-      );
+        ),
+        const SizedBox(height: 20),
+      ]);
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionLabel('Professional Info'),
-        const SizedBox(height: 14),
-        _infoRow(Icons.psychology_outlined,        'Skills',
-            p.skills.isEmpty ? '—' : p.skills),
-        _divider(),
-        _infoRow(Icons.location_on_outlined,        'Location',
-            p.location.isEmpty ? '—' : p.location),
-        _divider(),
-        _infoRow(Icons.phone_outlined,               'Phone',
-            p.phone.isEmpty ? '—' : p.phone),
-        _divider(),
-        _infoRow(Icons.workspace_premium_outlined,   'Experience',
-            '${p.experience} year${p.experience == 1 ? '' : 's'}'),
-        const SizedBox(height: 20),
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _sectionLabel('Professional Info'),
+      const SizedBox(height: 14),
+      _infoRow(Icons.psychology_outlined, 'Skills',
+          p.skills.isEmpty ? '—' : p.skills),
+      _divider(),
+      _infoRow(Icons.location_on_outlined, 'Location',
+          p.location.isEmpty ? '—' : p.location),
+      _divider(),
+      _infoRow(Icons.phone_outlined, 'Phone',
+          p.phone.isEmpty ? '—' : p.phone),
+      _divider(),
+      _infoRow(Icons.workspace_premium_outlined, 'Experience',
+          '${p.experience} year${p.experience == 1 ? '' : 's'}'),
+    ]);
+  }
 
-        // Skills chips
-        if (p.skills.isNotEmpty) ...[
-          _sectionLabel('Skills'),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8, runSpacing: 8,
-            children: p.skills
-                .split(RegExp(r'[,|\s]+'))
-                .map((s) => s.trim())
-                .where((s) => s.isNotEmpty)
-                .map((s) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.3)),
-                      ),
-                      child: Text(s,
-                        style: GoogleFonts.inter(
-                          fontSize: 12, fontWeight: FontWeight.w500,
-                          color: AppColors.primary)),
-                    ))
-                .toList(),
+  Widget _editForm(ProfileProvider profile) {
+    final saving = profile.loading;
+    return Form(
+      key: _formKey,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _sectionLabel('Edit Professional Info'),
+        const SizedBox(height: 16),
+        AppTextField(
+          controller: _skillsCtrl,
+          label:      'Skills',
+          hint:       'e.g. Flutter, Java, SQL — comma separated',
+          prefixIcon: Icons.psychology_outlined,
+          validator:  (v) => (v == null || v.isEmpty) ? 'Required' : null,
+        ),
+        const SizedBox(height: 14),
+        AppTextField(
+          controller: _locationCtrl,
+          label:      'Location',
+          hint:       'e.g. Bangalore, India',
+          prefixIcon: Icons.location_on_outlined,
+          validator:  (v) => (v == null || v.isEmpty) ? 'Required' : null,
+        ),
+        const SizedBox(height: 14),
+        AppTextField(
+          controller:   _phoneCtrl,
+          label:        'Phone',
+          hint:         '+91 9876543210',
+          prefixIcon:   Icons.phone_outlined,
+          keyboardType: TextInputType.phone,
+          validator:    (v) => (v == null || v.isEmpty) ? 'Required' : null,
+        ),
+        const SizedBox(height: 14),
+        AppTextField(
+          controller:   _expCtrl,
+          label:        'Years of Experience',
+          hint:         '0',
+          prefixIcon:   Icons.workspace_premium_outlined,
+          keyboardType: TextInputType.number,
+          validator:    (v) => (v == null || v.isEmpty) ? 'Required' : null,
+        ),
+        const SizedBox(height: 24),
+        Row(children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: saving ? null : _save,
+              child: saving
+                  ? const SizedBox(
+                      width: 18, height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Color(0xFF0D0F12)))
+                  : const Text('Save Profile'),
+            ),
           ),
-        ],
-      ],
+          const SizedBox(width: 12),
+          OutlinedButton(
+            onPressed: () => setState(() { _editing = false; _prefill(); }),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 48),
+              side: const BorderSide(color: AppColors.divider),
+              foregroundColor: AppColors.textSecondary),
+            child: const Text('Cancel'),
+          ),
+        ]),
+      ]),
     );
   }
 
@@ -328,95 +547,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       Icon(icon, size: 16, color: AppColors.textMuted),
       const SizedBox(width: 12),
       Text('$label  ',
-        style: GoogleFonts.inter(
-          fontSize: 13, color: AppColors.textMuted)),
+        style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted)),
       Expanded(
         child: Text(value,
           style: GoogleFonts.inter(
             fontSize: 14, fontWeight: FontWeight.w500,
             color: AppColors.textPrimary),
-          textAlign: TextAlign.end),
-      ),
+          textAlign: TextAlign.end)),
     ]),
   );
 
   Widget _divider() =>
       Divider(height: 1, color: AppColors.divider.withValues(alpha: 0.6));
-
-  Widget _editForm(ProfileProvider profile) {
-    final saving = profile.loading;
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _sectionLabel('Edit Profile'),
-          const SizedBox(height: 16),
-          AppTextField(
-            controller: _skillsCtrl,
-            label:      'Skills',
-            hint:       'e.g. Flutter, Java, SQL',
-            prefixIcon: Icons.psychology_outlined,
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Required' : null,
-          ),
-          const SizedBox(height: 14),
-          AppTextField(
-            controller: _locationCtrl,
-            label:      'Location',
-            hint:       'e.g. Bangalore, India',
-            prefixIcon: Icons.location_on_outlined,
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Required' : null,
-          ),
-          const SizedBox(height: 14),
-          AppTextField(
-            controller:   _phoneCtrl,
-            label:        'Phone',
-            hint:         '+91 9876543210',
-            prefixIcon:   Icons.phone_outlined,
-            keyboardType: TextInputType.phone,
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Required' : null,
-          ),
-          const SizedBox(height: 14),
-          AppTextField(
-            controller:   _expCtrl,
-            label:        'Years of Experience',
-            hint:         '0',
-            prefixIcon:   Icons.workspace_premium_outlined,
-            keyboardType: TextInputType.number,
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Required' : null,
-          ),
-          const SizedBox(height: 24),
-          Row(children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: saving ? null : _save,
-                child: saving
-                    ? const SizedBox(
-                        width: 18, height: 18,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFF0D0F12)))
-                    : const Text('Save Profile'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            OutlinedButton(
-              onPressed: () => setState(() { _editing = false; _prefill(); }),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 48),
-                side: const BorderSide(color: AppColors.divider),
-                foregroundColor: AppColors.textSecondary),
-              child: const Text('Cancel'),
-            ),
-          ]),
-        ],
-      ),
-    );
-  }
 
   Widget _iconBtn(IconData icon, String tooltip, VoidCallback onTap,
       {Color color = AppColors.textSecondary}) =>
