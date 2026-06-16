@@ -99,25 +99,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: AppColors.textPrimary)),
                     ]),
                     const Spacer(),
-                    Text('Find work that\nmoves you forward.',
+                    Text('Your next big\nrole is one\nclick away.',
                       style: GoogleFonts.inter(
                         fontSize: 36, fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary, height: 1.2,
+                        color: AppColors.textPrimary, height: 1.15,
                         letterSpacing: -0.8)),
                     const SizedBox(height: 16),
-                    Text('Join 32k+ professionals who found their\nnext role through HireLoop.',
+                    Text('HireLoop uses AI to match your skills\nto the right companies — automatically.',
                       style: GoogleFonts.inter(
                         fontSize: 15, color: AppColors.textSecondary, height: 1.6)),
                     const SizedBox(height: 40),
                     ...[
-                      '✓  Senior roles only — no junior clutter',
-                      '✓  Companies that reply within 48h',
-                      '✓  Salary ranges shown upfront',
+                      '⚡  AI matches you to jobs in seconds',
+                      '✉  Send a cold email with one tap',
+                      '📄  Resume attached automatically',
                     ].map((s) => Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: Text(s,
                             style: GoogleFonts.inter(
-                              fontSize: 13, color: AppColors.textSecondary)),
+                              fontSize: 13, color: AppColors.textSecondary, height: 1.5)),
                         )),
                     const Spacer(),
                   ],

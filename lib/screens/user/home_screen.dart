@@ -10,14 +10,17 @@ import 'job_detail_screen.dart';
 import '../auth/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  // Callbacks wired by UserShell so top-bar links can switch tabs
   final VoidCallback? onGoToApplications;
   final VoidCallback? onGoToProfile;
+  final VoidCallback? onGoToAiMatch;
+  final VoidCallback? onGoToMessages;
 
   const HomeScreen({
     super.key,
     this.onGoToApplications,
     this.onGoToProfile,
+    this.onGoToAiMatch,
+    this.onGoToMessages,
   });
 
   @override
@@ -188,14 +191,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 if (isWide) ...[
                   const SizedBox(width: 36),
-                  // ── Find Jobs — current page, highlighted ──
+                  _NavChip(label: 'Find Jobs', active: true, onTap: null),
+                  const SizedBox(width: 4),
                   _NavChip(
-                    label: 'Find Jobs',
-                    active: true,
-                    onTap: null, // already here
+                    label: 'AI Match',
+                    active: false,
+                    icon: Icons.auto_awesome_outlined,
+                    iconColor: const Color(0xFF8B5CF6),
+                    onTap: widget.onGoToAiMatch,
                   ),
                   const SizedBox(width: 4),
-                  // ── My Profile — navigates to profile tab ──
+                  _NavChip(
+                    label: 'Messages',
+                    active: false,
+                    icon: Icons.forum_outlined,
+                    onTap: widget.onGoToMessages,
+                  ),
+                  const SizedBox(width: 4),
+                  _NavChip(
+                    label: 'Applied',
+                    active: false,
+                    icon: Icons.inbox_outlined,
+                    onTap: widget.onGoToApplications,
+                  ),
+                  const SizedBox(width: 4),
                   _NavChip(
                     label: 'My Profile',
                     active: false,
@@ -270,25 +289,25 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Headline
-          Text('Find work that',
+          Text('Land the job',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 52, fontWeight: FontWeight.w800,
               color: AppColors.textPrimary, height: 1.1,
               letterSpacing: -1.5)),
-          Text('moves you forward.',
+          Text('you actually deserve.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 52, fontWeight: FontWeight.w800,
               color: AppColors.primary, height: 1.1,
               letterSpacing: -1.5)),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           Text(
-            'A curated marketplace of senior engineering, design,\nand product roles at companies that take craft seriously.',
+            'Upload your resume once. HireLoop\'s AI reads your skills,\nmatches the right roles, and writes your cold email — instantly.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 15, color: AppColors.textSecondary, height: 1.65)),
+              fontSize: 15, color: AppColors.textSecondary, height: 1.7)),
 
           const SizedBox(height: 36),
 
@@ -740,14 +759,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // ── Nav chip widget ───────────────────────────────────────────────────────────
 class _NavChip extends StatefulWidget {
-  final String label;
-  final bool   active;
-  final IconData? icon;
+  final String     label;
+  final bool       active;
+  final IconData?  icon;
+  final Color?     iconColor;
   final VoidCallback? onTap;
   const _NavChip({
     required this.label,
     required this.active,
     this.icon,
+    this.iconColor,
     this.onTap,
   });
   @override
@@ -783,7 +804,7 @@ class _NavChipState extends State<_NavChip> {
               if (widget.icon != null) ...[
                 Icon(widget.icon, size: 14,
                     color: effective
-                        ? AppColors.primary
+                        ? (widget.iconColor ?? AppColors.primary)
                         : AppColors.textSecondary),
                 const SizedBox(width: 5),
               ],
