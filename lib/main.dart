@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
+import 'core/utils/api_client.dart';
 import 'providers/auth_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/user/user_shell.dart';
@@ -22,9 +23,16 @@ void main() async {
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
+  // Create the provider early so the 401 callback can reference it.
+  final authProvider = AuthProvider()..restoreSession();
+
+  // Any 401 response from the backend calls logout(expired: true) automatically,
+  // regardless of which screen or service triggered the request.
+  ApiClient.onSessionExpired = () => authProvider.logout(expired: true);
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthProvider()..restoreSession(),
+    ChangeNotifierProvider.value(
+      value: authProvider,
       child: const JobPortalApp(),
     ),
   );
@@ -44,28 +52,45 @@ class JobPortalApp extends StatelessWidget {
   }
 }
 
-class _AuthGate extends StatelessWidget {
+class _AuthGate extends StatefulWidget {
   const _AuthGate();
+  @override
+  State<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<_AuthGate> {
+  bool _splashDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) setState(() => _splashDone = true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
-    if (!auth.isLoggedIn && auth.token == null) {
-      return FutureBuilder(
-        future: Future.delayed(const Duration(milliseconds: 400)),
-        builder: (_, snap) {
-          if (snap.connectionState != ConnectionState.done) {
-            return const _SplashScreen();
-          }
-          return auth.isLoggedIn
-              ? (auth.role == 'ADMIN' ? const AdminShell() : const UserShell())
-              : const LoginScreen();
-        },
-      );
+    if (!_splashDone) return const _SplashScreen();
+
+    if (!auth.isLoggedIn) {
+      // Show snackbar on the next frame when a session expired mid-use.
+      if (auth.sessionExpired) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Session expired — please log in again.'),
+              backgroundColor: Color(0xFFEF4444),
+              duration: Duration(seconds: 4),
+            ),
+          );
+        });
+      }
+      return const LoginScreen();
     }
 
-    if (!auth.isLoggedIn) return const LoginScreen();
     return auth.role == 'ADMIN' ? const AdminShell() : const UserShell();
   }
 }

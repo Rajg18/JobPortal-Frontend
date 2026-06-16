@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import '../core/utils/api_client.dart';
 import '../core/utils/storage_service.dart';
 import '../data/services/auth_service.dart';
 
@@ -9,19 +10,28 @@ class AuthProvider extends ChangeNotifier {
   String? _token;
   String? _role;
   String? _email;
-  bool    _loading = false;
+  bool    _loading        = false;
   String? _error;
+  bool    _sessionExpired = false;
 
-  String? get token   => _token;
-  String? get role    => _role;
-  String? get email   => _email;
-  bool    get loading => _loading;
-  String? get error   => _error;
-  bool    get isLoggedIn => _token != null;
+  String? get token          => _token;
+  String? get role           => _role;
+  String? get email          => _email;
+  bool    get loading        => _loading;
+  String? get error          => _error;
+  bool    get isLoggedIn     => _token != null;
+  bool    get sessionExpired => _sessionExpired;
 
   // Called on app startup — restore session from storage.
+  // Clears storage immediately if the stored token has already expired.
   Future<void> restoreSession() async {
-    _token = await StorageService.getToken();
+    final token = await StorageService.getToken();
+    if (token != null && ApiClient.isTokenExpired(token)) {
+      await StorageService.clear();
+      notifyListeners();
+      return;
+    }
+    _token = token;
     _role  = await StorageService.getRole();
     _email = await StorageService.getEmail();
     notifyListeners();
@@ -33,10 +43,11 @@ class AuthProvider extends ChangeNotifier {
       final token = await _service.login(email: email, password: password);
       final role  = _decodeRole(token);
       await StorageService.saveAuth(token: token, role: role, email: email);
-      _token = token;
-      _role  = role;
-      _email = email;
-      _error = null;
+      _token          = token;
+      _role           = role;
+      _email          = email;
+      _error          = null;
+      _sessionExpired = false;
       return true;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
@@ -65,11 +76,12 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout({bool expired = false}) async {
     await StorageService.clear();
-    _token = null;
-    _role  = null;
-    _email = null;
+    _token          = null;
+    _role           = null;
+    _email          = null;
+    _sessionExpired = expired;
     notifyListeners();
   }
 
