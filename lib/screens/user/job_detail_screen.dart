@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/models/job_model.dart';
 import '../../providers/application_provider.dart';
+import 'send_cold_email_screen.dart';
 
 class JobDetailScreen extends StatefulWidget {
   final JobModel job;
@@ -260,26 +261,48 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   ],
                 ),
               )
-            : SizedBox(
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _applying ? null : _apply,
-                  child: _applying
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Apply Now'),
-                            const SizedBox(width: 6),
-                            const Icon(Icons.arrow_forward_rounded, size: 16),
-                          ],
-                        ),
+            : Row(children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SendColdEmailScreen(job: widget.job)),
+                      ),
+                      icon: const Icon(Icons.send_rounded, size: 16),
+                      label: const Text('Cold Email'),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.divider),
+                        foregroundColor: AppColors.textSecondary),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _applying ? null : _apply,
+                      child: _applying
+                          ? const SizedBox(
+                              width: 20, height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white))
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Apply Now'),
+                                SizedBox(width: 6),
+                                Icon(Icons.arrow_forward_rounded, size: 16),
+                              ],
+                            ),
+                    ),
+                  ),
+                ),
+              ]),
         );
       }),
     );
