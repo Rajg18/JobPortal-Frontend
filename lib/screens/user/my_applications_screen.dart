@@ -6,7 +6,8 @@ import '../../providers/application_provider.dart';
 import '../../widgets/status_badge.dart';
 
 class MyApplicationsScreen extends StatefulWidget {
-  const MyApplicationsScreen({super.key});
+  final VoidCallback? onGoHome;
+  const MyApplicationsScreen({super.key, this.onGoHome});
   @override
   State<MyApplicationsScreen> createState() => _MyApplicationsScreenState();
 }
@@ -64,6 +65,17 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
               title: Padding(
                 padding: pad,
                 child: Row(children: [
+                  if (widget.onGoHome != null) ...[
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                      color: AppColors.textSecondary,
+                      tooltip: 'Back to Home',
+                      onPressed: widget.onGoHome,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   Text('My Applications',
                     style: GoogleFonts.inter(
                       fontSize: 18, fontWeight: FontWeight.w700,
