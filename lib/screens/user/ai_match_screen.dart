@@ -556,6 +556,25 @@ class _MatchedJobCard extends StatelessWidget {
               ),
             ),
           ]),
+
+          const SizedBox(height: 8),
+
+          // Cold email tip
+          Row(children: [
+            const Icon(Icons.auto_awesome_rounded,
+                size: 12, color: Color(0xFF10B981)),
+            const SizedBox(width: 5),
+            Expanded(
+              child: Text(
+                'Tap "Send Cold Email" to let AI write a personalised email for you automatically.',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: const Color(0xFF10B981),
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ]),
         ],
       ),
     );
