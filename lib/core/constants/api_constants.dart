@@ -1,8 +1,8 @@
 class ApiConstants {
-  static const String _productionUrl = 'https://jobportal-backend-z2pv.onrender.com';
+  static const String _productionUrl = 'https://jobportal-backend-production.up.railway.app';
   static const String _localUrl      = 'http://localhost:8080';
 
-  static String get baseUrl => _localUrl;
+  static String get baseUrl => _productionUrl;
 
   // ── Auth ────────────────────────────────────────────────────────────────────
   static String get register => '$baseUrl/auth/register';
