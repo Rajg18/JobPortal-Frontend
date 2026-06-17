@@ -158,7 +158,7 @@ class _AiMatchScreenState extends State<AiMatchScreen> {
                             color: const Color(0xFF8B5CF6).withValues(alpha: 0.25)),
                       ),
                       child: Row(children: [
-                        const Icon(Icons.info_outline_rounded,
+                        const Icon(Icons.auto_awesome_rounded,
                             size: 18, color: Color(0xFF8B5CF6)),
                         const SizedBox(width: 10),
                         Expanded(
@@ -172,6 +172,63 @@ class _AiMatchScreenState extends State<AiMatchScreen> {
                         ),
                       ]),
                     ),
+
+                    // ── Resume required notice ───────────────────────────────
+                    if (profile == null || !profile.resumeUploaded) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: const Color(0xFFF59E0B).withValues(alpha: 0.35)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.upload_file_rounded,
+                                size: 18, color: Color(0xFFF59E0B)),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Resume required before AI matching',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13, fontWeight: FontWeight.w600,
+                                      color: const Color(0xFFF59E0B))),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Go to your Profile, upload your resume PDF, and let our AI extract your skills. '
+                                    'Then come back here to see matched jobs instantly.',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                      height: 1.5)),
+                                  const SizedBox(height: 10),
+                                  GestureDetector(
+                                    onTap: widget.onGoHome,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 14, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF59E0B),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text('Go to Profile → Upload Resume',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12, fontWeight: FontWeight.w600,
+                                          color: Colors.black)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 20),
 
