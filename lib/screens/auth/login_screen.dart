@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/app_text_field.dart';
@@ -120,6 +121,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontSize: 13, color: AppColors.textSecondary, height: 1.5)),
                         )),
                     const Spacer(),
+                    const _WalkthroughLinks(),
+                    const SizedBox(height: 48),
                   ],
                 ),
               ),
@@ -222,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: AppColors.warning.withValues(alpha: 0.3)),
                               ),
                               child: Row(children: [
-                                SizedBox(
+                                const SizedBox(
                                   width: 14, height: 14,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
@@ -276,6 +279,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                     ),
+
+                    if (!isWide) ...[
+                      const SizedBox(height: 32),
+                      const _WalkthroughLinks(),
+                    ],
                   ],
                 ),
               ),
@@ -283,6 +291,74 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Project walkthrough links ──────────────────────────────────────────────
+class _WalkthroughLinks extends StatelessWidget {
+  const _WalkthroughLinks();
+
+  Future<void> _open(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.play_circle_outline_rounded,
+                size: 14, color: AppColors.textMuted),
+            const SizedBox(width: 6),
+            Text('Project Walkthrough',
+              style: GoogleFonts.inter(
+                fontSize: 11, fontWeight: FontWeight.w600,
+                color: AppColors.textMuted, letterSpacing: 0.4)),
+          ]),
+          const SizedBox(height: 10),
+          _link('Job Seeker Panel',
+              'https://www.loom.com/share/1ba7feb2dfd14a448c3cd8de7e0a5840'),
+          const SizedBox(height: 8),
+          _link('Admin Panel',
+              'https://www.loom.com/share/3c681afaacc04e6c9f702dd230aaa1b0'),
+        ],
+      ),
+    );
+  }
+
+  Widget _link(String label, String url) {
+    return GestureDetector(
+      onTap: () => _open(url),
+      child: Row(children: [
+        Container(
+          width: 6, height: 6,
+          decoration: const BoxDecoration(
+            color: AppColors.primary,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(label,
+          style: GoogleFonts.inter(
+            fontSize: 12, color: AppColors.primary,
+            decoration: TextDecoration.underline,
+            decorationColor: AppColors.primary)),
+        const SizedBox(width: 4),
+        const Icon(Icons.open_in_new_rounded,
+            size: 11, color: AppColors.primary),
+      ]),
     );
   }
 }
