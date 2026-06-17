@@ -1,11 +1,11 @@
 {
-    "name": "job_portal_flutter",
-    "short_name": "job_portal_flutter",
+    "name": "HireLoop — AI-Powered Job Portal",
+    "short_name": "HireLoop",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0F1115",
+    "theme_color": "#10B981",
+    "description": "AI-powered job portal that matches your resume to the right jobs and drafts personalized cold emails.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
